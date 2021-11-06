@@ -5,6 +5,7 @@ interface DatapackVersion{
     canal? :string|null,
     version? :string|null,
     type?: 'dev'|'release'|null,
+    commit: string,
     modules?: string[]|null
 }
 
@@ -16,50 +17,56 @@ export function getCanals(){
 }
 
 function getPackage(folder :string): DatapackVersion|void{
-    if(fs.existsSync( path.resolve('datapacks/' + folder))){
-        let versionRaw
-        try {
-            versionRaw = fs.readFileSync(path.resolve('datapacks/' + folder + '/package.json'), {encoding:'utf8'})
-            
-        } catch (error) {
-            let datapack: DatapackVersion = {
-                canal: null,
-                type: null,
-                version: null
-            }
-        
-            if(folder.startsWith('dev/')){
-                datapack.canal = folder.slice(folder.split('/')[0].length + 1)
-                datapack.type = 'dev'
-                datapack.version = 'dev'
-            } else if (folder.startsWith('release/')){
-                let releaseName = folder.slice(folder.split('/')[0].length + 1)
-                datapack.canal = releaseName.split('-')[0]
-                datapack.version = releaseName.slice(datapack.canal.length + 1)
-                datapack.type = 'release'
-            }
-
-            let modules = []
-
-            try {
-                modules = fs.readdirSync(path.resolve('datapacks/' + folder + '/data'), { withFileTypes: true })
-                    .filter(dirent => dirent.isDirectory())
-                    .map(dirent => dirent.name)
-            } catch (error) {
-                return
-            }
-
-            datapack.modules = modules
-       
-            try {
-                fs.writeFileSync( path.resolve('datapacks/' + folder + '/package.json'), JSON.stringify(datapack) );
-                return datapack
-            } catch (error) {
-                return
-            }
-        }
-        return JSON.parse(versionRaw)
+    let commitSha: string
+    try {
+        commitSha = fs.readFileSync(path.resolve('datapacks/' + folder + '/available.txt'), {encoding:'utf8'})
+    } catch(e){
+        return
     }
+
+    let versionRaw
+    try {
+        versionRaw = fs.readFileSync(path.resolve('datapacks/' + folder + '/package.json'), {encoding:'utf8'})
+        
+    } catch (error) {
+        let datapack: DatapackVersion = {
+            canal: null,
+            type: null,
+            version: null,
+            commit: commitSha,
+        }
+    
+        if(folder.startsWith('dev/')){
+            datapack.canal = folder.split('/')[1]
+            datapack.type = 'dev'
+            datapack.version = 'dev'
+        } else if (folder.startsWith('release/')){
+            let releaseName = folder.slice(folder.split('/')[0].length + 1)
+            datapack.canal = releaseName.split('-')[0]
+            datapack.version = releaseName.slice(datapack.canal.length + 1)
+            datapack.type = 'release'
+        }
+
+        let modules = []
+
+        try {
+            modules = fs.readdirSync(path.resolve('datapacks/' + folder + '/data'), { withFileTypes: true })
+                .filter(dirent => dirent.isDirectory())
+                .map(dirent => dirent.name)
+        } catch (error) {
+            return
+        }
+
+        datapack.modules = modules
+    
+        try {
+            fs.writeFileSync( path.resolve('datapacks/' + folder + '/package.json'), JSON.stringify(datapack) );
+            return datapack
+        } catch (error) {
+            return
+        }
+    }
+    return JSON.parse(versionRaw)
     
 }
 
@@ -71,7 +78,7 @@ function getDatapacks(folder :string): DatapackVersion[]{
     let versions: DatapackVersion[] = []
 
         for (let dev of devs){
-
+            
             let datapack: DatapackVersion|void = getPackage(folder + '/' + dev)
 
             if(datapack){
@@ -85,7 +92,34 @@ function getDatapacks(folder :string): DatapackVersion[]{
 
 export function getDevs(){
 
-    return getDatapacks('dev')
+    const canals = fs.readdirSync( path.resolve('datapacks/dev'), { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => dirent.name)
+
+    let versions: DatapackVersion[] = []
+
+    for (let canal of canals){
+
+        let latest: string
+
+        try{
+            latest = fs.readFileSync(path.resolve('datapacks/dev/' + canal + '/latest.txt'), {encoding:'utf8'})
+        } catch (e) {
+            continue
+        }
+
+        console.log(latest)
+        
+        let datapack: DatapackVersion|void = getPackage(`dev/${canal}/${latest}` )
+
+
+        if(datapack){
+            versions.push(datapack)
+        }
+        
+    }
+
+    return versions
 }
 
 interface Canal {

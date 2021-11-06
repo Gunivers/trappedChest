@@ -3,8 +3,8 @@ import { Box, Button, Card, CardContent, CardMedia, Checkbox, FormControlLabel, 
 import React, { useState, useEffect } from "react";
 export default function Datapack({ data }){
     let [selectedVersion, setSelectedVersion] = React.useState(null);
-    const lastCanal = data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]];
-    const LastRelease = lastCanal.versions[lastCanal.versions -1]
+    // const lastCanal = data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]];
+    // const LastRelease = lastCanal.versions[lastCanal.versions -1]
     // setSelectedVersion(data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]].versions.pop())
     // console.log(selectedVersion.canal)
 
@@ -124,7 +124,8 @@ export default function Datapack({ data }){
                     
                             <h1>{selectedVersion.canal} - {selectedVersion.version}</h1>
                             <Link href={urlDatapack} download>
-                                <Button variant="contained" startIcon={<Download />}>Télécharger le datapack</Button>
+                                {/* <Button variant="contained" startIcon={<Download />}>Télécharger le datapack</Button> */}
+                                <Button variant="contained">Télécharger le datapack</Button>
                             </Link>
                         </CardContent>
                     </Card>
