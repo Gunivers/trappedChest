@@ -1,25 +1,48 @@
 // import { Download } from "@mui/icons-material";
 import { Box, Button, Card, CardContent, CardMedia, Checkbox, FormControlLabel, FormGroup, Grid, Link, List, ListItem, ListItemButton, ListItemText, ListSubheader, Stack, Toolbar, Typography } from "@mui/material";
-import React, { useState, useEffect } from "react";
-export default function Datapack({ data }){
-    let [selectedVersion, setSelectedVersion] = React.useState(null);
-    // const lastCanal = data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]];
-    // const LastRelease = lastCanal.versions[lastCanal.versions -1]
+import React, { useState, useEffect, ChangeEvent, MouseEvent, SyntheticEvent } from "react";
+
+interface IDictionary {
+    [index: string]: boolean;
+}
+
+interface DatapackVersion{
+    canal? :string|null,
+    version? :string|null,
+    type?: 'dev'|'release'|null,
+    commit?: string,
+    modules?: string[]|null
+}
+
+interface ListModules {
+    [index: string]: any;
+}
+
+
+export default function Datapack({ data }: any){
+
+    // let selectedVersion: DatapackVersion|null
+    // let setSelectedVersion: React.Dispatch<React.SetStateAction<DatapackVersion>>|React.Dispatch<React.SetStateAction<null>>
+    // console.log(data)
+    const lastCanal = data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]];
+    const LastRelease: DatapackVersion = lastCanal.versions[lastCanal.versions.lenght -1]
+    // console.log(lastCanal.versions.lenght)
+
+    let [selectedVersion, setSelectedVersion] = React.useState(LastRelease);
     // setSelectedVersion(data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]].versions.pop())
     // console.log(selectedVersion.canal)
 
-    interface IDictionary {
-        [index: string]: boolean;
-    }
+    let activeModules: IDictionary
+    let setActiveModules: React.Dispatch<React.SetStateAction<IDictionary>>
 
-    let [activeModules, setActiveModules] = useState({});
+    [activeModules, setActiveModules] = useState({});
     let [urlDatapack, setUrlDatapack] = useState('');
 
 
-    const handleListItemClick = (event, version: string) => {
+    const handleListItemClick = (event: MouseEvent<HTMLDivElement>, version: DatapackVersion) => {
         // console.log('handleListItemClick')
-        let updatedModules = {}
-        version.modules.map( module => {
+        let updatedModules: IDictionary = {}
+        version.modules?.map( module => {
             if(!activeModules.hasOwnProperty(module)){
                 updatedModules[module] = true;
             }
@@ -31,11 +54,12 @@ export default function Datapack({ data }){
         setSelectedVersion(version);
     };
 
-    const handleModuleChange = (event, module: string, activeModules: string) => {
+    const handleModuleChange = (event: ChangeEvent<HTMLInputElement>, module: string, activeModules: IDictionary) => {
         // console.log('handleModuleChange')
         // let modules = activeModules
-        let updatedModules = {}
-        updatedModules[module] = event.target.checked;
+        let updatedModules: IDictionary = {}
+
+        updatedModules[module] = event.target?.checked;
 
         setActiveModules({
             ...activeModules,
@@ -44,17 +68,18 @@ export default function Datapack({ data }){
     }
 
     useEffect(() => {
+
         if (selectedVersion){
-            let modules = []
+            let modules = [] as unknown as ListModules;
             Object.keys(activeModules).map( module => {
-                if (activeModules[module] && selectedVersion.modules.includes(module)){
+                if (activeModules[module] && selectedVersion.modules?.includes(module)){
                     modules.push(module)
                 }
             })
             setUrlDatapack(`api/datapacks/${selectedVersion.canal}/${selectedVersion.version}/${modules.join('|')}`)
         }
         
-    })
+    }, [selectedVersion, activeModules])
 
     return (
         <>
@@ -73,7 +98,7 @@ export default function Datapack({ data }){
                         Gunivers-Libs
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                        La Glib est une librairie pour vous, datapackers, ajoutant pleins d'outils et de fonctions utiles pour vos créations de contenus et de map.
+                        La Glib est une librairie pour vous, datapackers, ajoutant pleins d&apos;outils et de fonctions utiles pour vos créations de contenus et de map.
                         </Typography>
                     </CardContent>
                 </Card>
@@ -101,11 +126,11 @@ export default function Datapack({ data }){
                     
                         <ul>
                         <ListSubheader>Dev</ListSubheader>
-                        {data.devs.map( (version) => (
+                        {data.devs.map( (version: DatapackVersion) => (
                             <ListItemButton
                             key={version.canal}
                             selected={selectedVersion === version}
-                            onClick={(event) => handleListItemClick(event, version, activeModules)}
+                            onClick={(event) => handleListItemClick(event, version)}
                             >
                             <ListItemText primary={version.canal} />
                             </ListItemButton>
@@ -135,8 +160,8 @@ export default function Datapack({ data }){
                             Modules
                             </Typography>
                             <FormGroup>
-                            {selectedVersion.modules.map( (module) => (
-                                    <FormControlLabel key={module} onChange={(event) => handleModuleChange(event, module, activeModules)} control={<Checkbox checked={activeModules[module]} className={'moduleBtn'}/>} label={module} />
+                            {selectedVersion.modules?.map( (module) => (
+                                    <FormControlLabel key={module} control={<Checkbox checked={activeModules[module]} onChange={(event) => handleModuleChange(event, module, activeModules)} className={'moduleBtn'}/>} label={module} />
                                 ))}
                             </FormGroup>
                         </CardContent>
@@ -188,18 +213,18 @@ export default function Datapack({ data }){
     )
 }
 
-export function Canal({ canal, selectedVersion, handleListItemClick }){
+export function Canal({ canal, selectedVersion, handleListItemClick }: any){
     return (
         <ul>
             <ListSubheader>{canal.canal}</ListSubheader>
-            {canal.versions.map( (version) => (
+            {canal.versions.map( (version: DatapackVersion) => (
                 <Version version={version} key={version.version} selectedVersion={selectedVersion} handleListItemClick={handleListItemClick}/>
             ))}
         </ul>
     )
 }
 
-export function Version({ version, selectedVersion, handleListItemClick }){
+export function Version({ version, selectedVersion, handleListItemClick }: any){
     return(
         <>
             <ListItemButton

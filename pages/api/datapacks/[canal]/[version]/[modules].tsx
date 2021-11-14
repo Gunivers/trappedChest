@@ -3,9 +3,9 @@ import fs from 'fs'
 import {resolve} from 'path'
 let AdmZip = require("adm-zip");
 
-export default function(req, res) {
+export default function(req: any, res: any) {
 
-  console.log(req.query)
+  // console.log(req.query)
 
   let path = `datapacks/release/${req.query.canal}-${req.query.version}`
   
@@ -13,18 +13,18 @@ export default function(req, res) {
     path = `datapacks/dev/${req.query.canal}`
   }
 
-  console.log(path)
+  // console.log(path)
 
   let reqModules = req.query.modules.split('|')
   let datapack
 
-  console.log(resolve(path + '/package.json'))
+  // console.log(resolve(path + '/package.json'))
 
   try {
     datapack = JSON.parse(fs.readFileSync(resolve(path + '/package.json'), {encoding:'utf8'}))
       
   } catch (error) {
-    console.log('package.json', error)
+    // console.log('package.json', error)
     return
   }
 
@@ -47,9 +47,9 @@ export default function(req, res) {
     }
     try {
       zip.addLocalFolder(resolve(path + '/data/' + module), '/data/' + module)
-      console.log(resolve(path + '/data/' + module))
+      // console.log(resolve(path + '/data/' + module))
     } catch (error) {
-      console.log('zip module', error)
+      // console.log('zip module', error)
       continue
     }
   }

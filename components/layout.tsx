@@ -2,7 +2,7 @@ import { AppBar, Toolbar, Typography } from "@mui/material";
 import Head from "next/head";
 import { ComponentProps} from "react";
 
-export default function Layout({ children }: ComponentProps){
+export default function Layout({ children }: any){
     return(
         <>
         <Head>

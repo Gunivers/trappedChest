@@ -108,7 +108,7 @@ export function getDevs(){
             continue
         }
 
-        console.log(latest)
+        // console.log(latest)
         
         let datapack: DatapackVersion|void = getPackage(`dev/${canal}/${latest}` )
 
