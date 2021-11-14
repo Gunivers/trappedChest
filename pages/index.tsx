@@ -16,7 +16,7 @@ const Home: NextPage = (glib) => {
 
 export default Home
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   const glib: {}|null = await getGlib()
   return {
     props: 

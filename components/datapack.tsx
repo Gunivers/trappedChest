@@ -24,11 +24,11 @@ export default function Datapack({ data }: any){
     // let selectedVersion: DatapackVersion|null
     // let setSelectedVersion: React.Dispatch<React.SetStateAction<DatapackVersion>>|React.Dispatch<React.SetStateAction<null>>
     // console.log(data)
-    const lastCanal = data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]];
-    const LastRelease: DatapackVersion = lastCanal.versions[lastCanal.versions.lenght -1]
+    // const lastCanal = data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]];
+    // const LastRelease: DatapackVersion = lastCanal.versions[lastCanal.versions.lenght -1]
     // console.log(lastCanal.versions.lenght)
 
-    let [selectedVersion, setSelectedVersion] = React.useState(LastRelease);
+    let [selectedVersion, setSelectedVersion] = React.useState<DatapackVersion|null>({});
     // setSelectedVersion(data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]].versions.pop())
     // console.log(selectedVersion.canal)
 
@@ -72,7 +72,7 @@ export default function Datapack({ data }: any){
         if (selectedVersion){
             let modules = [] as unknown as ListModules;
             Object.keys(activeModules).map( module => {
-                if (activeModules[module] && selectedVersion.modules?.includes(module)){
+                if (activeModules[module] && selectedVersion?.modules?.includes(module)){
                     modules.push(module)
                 }
             })
