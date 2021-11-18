@@ -20,6 +20,7 @@ function getPackage(folder :string): DatapackVersion|void{
     let commitSha: string
     try {
         commitSha = fs.readFileSync(path.resolve('datapacks/' + folder + '/available.txt'), {encoding:'utf8'})
+        console.log(commitSha)
     } catch(e){
         return
     }

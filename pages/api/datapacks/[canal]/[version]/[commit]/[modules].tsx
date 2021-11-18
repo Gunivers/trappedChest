@@ -10,7 +10,7 @@ export default function(req: any, res: any) {
   let path = `datapacks/release/${req.query.canal}-${req.query.version}`
   
   if(req.query.version == 'dev'){
-    path = `datapacks/dev/${req.query.canal}`
+    path = `datapacks/dev/${req.query.canal}/${req.query.commit}`
   }
 
   // console.log(path)

@@ -28,7 +28,7 @@ export default function Datapack({ data }: any){
     // const LastRelease: DatapackVersion = lastCanal.versions[lastCanal.versions.lenght -1]
     // console.log(lastCanal.versions.lenght)
 
-    let [selectedVersion, setSelectedVersion] = React.useState<DatapackVersion|null>({});
+    let [selectedVersion, setSelectedVersion] = React.useState<DatapackVersion|null>(null);
     // setSelectedVersion(data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]].versions.pop())
     // console.log(selectedVersion.canal)
 
@@ -76,7 +76,7 @@ export default function Datapack({ data }: any){
                     modules.push(module)
                 }
             })
-            setUrlDatapack(`api/datapacks/${selectedVersion.canal}/${selectedVersion.version}/${modules.join('|')}`)
+            setUrlDatapack(`api/datapacks/${selectedVersion.canal}/${selectedVersion.version}/${selectedVersion.commit}/${modules.join('|')}`)
         }
         
     }, [selectedVersion, activeModules])
