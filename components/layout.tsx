@@ -8,6 +8,7 @@ export default function Layout({ children }: any){
         <Head>
             <title>Glib Manager</title>
             <link rel="icon" href="/favicon.ico" />
+            <link rel="manifest" href="site.webmanifest"/>
         </Head>
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
             <Toolbar>

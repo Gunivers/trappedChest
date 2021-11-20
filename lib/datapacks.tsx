@@ -9,18 +9,10 @@ interface DatapackVersion{
     modules?: string[]|null
 }
 
-export function getCanals(){
-    let source = 'D:/Theo/Documents/Codage/glib-manager/datapacks/latest/'
-    return fs.readdirSync(source, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name)
-}
-
 function getPackage(folder :string): DatapackVersion|void{
     let commitSha: string
     try {
         commitSha = fs.readFileSync(path.resolve('datapacks/' + folder + '/available.txt'), {encoding:'utf8'})
-        console.log(commitSha)
     } catch(e){
         return
     }
@@ -56,6 +48,10 @@ function getPackage(folder :string): DatapackVersion|void{
                 .map(dirent => dirent.name)
         } catch (error) {
             return
+        }
+
+        if (modules.indexOf('minecraft') > -1) {
+            modules.splice(modules.indexOf('minecraft'), 1);
         }
 
         datapack.modules = modules

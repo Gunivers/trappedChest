@@ -30,15 +30,15 @@ export default function(req: any, res: any) {
 
   let zip = new AdmZip();
 
-  // fs.readdirSync(resolve(path)).forEach(file => {
-  //   console
-  //     // if (file.isDire)
-  //     try {
-  //       zip.addLocalFile(resolve(path + '/' + file))
-  //     } catch (error) {
-  //       console.log('file not found', error)
-  //     }
-  //   });
+  ['icon.png', 'pack.mcmeta', 'LICENSE'].forEach(file => {
+      try {
+        zip.addLocalFile(resolve(path + '/' + file))
+      } catch (error) {
+        return
+      }
+    });
+
+  zip.addLocalFolder(resolve(path + '/data/minecraft'), '/data/minecraft')
 
   for (let module of reqModules){
     if( !(datapack.modules.includes(module)) ){

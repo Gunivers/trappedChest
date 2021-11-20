@@ -1,5 +1,5 @@
 // import { Download } from "@mui/icons-material";
-import { Box, Button, Card, CardContent, CardMedia, Checkbox, FormControlLabel, FormGroup, Grid, Link, List, ListItem, ListItemButton, ListItemText, ListSubheader, Stack, Toolbar, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, CardMedia, Checkbox, FormControlLabel, FormGroup, Grid, Link, List, ListItem, ListItemButton, ListItemText, ListSubheader, Stack, Switch, Toolbar, Typography } from "@mui/material";
 import React, { useState, useEffect, ChangeEvent, MouseEvent, SyntheticEvent } from "react";
 
 interface IDictionary {
@@ -37,7 +37,11 @@ export default function Datapack({ data }: any){
 
     [activeModules, setActiveModules] = useState({});
     let [urlDatapack, setUrlDatapack] = useState('');
+    let [devVersion, setDevVersion] = useState(false);
 
+    const handleDevClick = (event: MouseEvent<HTMLDivElement>) => {
+        setDevVersion(!(devVersion));
+    }
 
     const handleListItemClick = (event: MouseEvent<HTMLDivElement>, version: DatapackVersion) => {
         // console.log('handleListItemClick')
@@ -100,13 +104,24 @@ export default function Datapack({ data }: any){
                         <Typography variant="body2" color="text.secondary">
                         La Glib est une librairie pour vous, datapackers, ajoutant pleins d&apos;outils et de fonctions utiles pour vos créations de contenus et de map.
                         </Typography>
+                        <Stack direction="row" spacing={1} sx={{ mt: 2}}>
+                            <Link href="https://glib-core.readthedocs.io/en/latest/index.html">
+                                <Button variant="contained">Documentation</Button>
+                            </Link>
+                            <Link href="https://gitlab.com/Altearn/gunivers/minecraft/datapack/Glibs/glib-core">
+                                <Button variant="outlined">Git</Button>
+                            </Link>
+                        </Stack>
                     </CardContent>
                 </Card>
             </Grid>
             <Grid item xs={3}>
                 <Card sx={{ bgcolor: 'background.paper' }}>
                     <CardContent>
-                        <h1>Version</h1>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between'}}>
+                            <Typography variant="h5" component="div">Version</Typography>
+                            <FormControlLabel control={<Switch checked={devVersion} onClick={(event) => handleDevClick(event)} />} label="Dev" />
+                        </Box>
                     </CardContent>
                     <List
                         sx={{
@@ -123,7 +138,7 @@ export default function Datapack({ data }: any){
                             <Canal canal={data.releases[canalId]} selectedVersion={selectedVersion} handleListItemClick={handleListItemClick}/>
                         </ul>
                     ))}
-                    
+                    {devVersion &&
                         <ul>
                         <ListSubheader>Dev</ListSubheader>
                         {data.devs.map( (version: DatapackVersion) => (
@@ -136,6 +151,8 @@ export default function Datapack({ data }: any){
                             </ListItemButton>
                         ))}
                         </ul>
+                    }
+                        
                     </li>
                     </List>
                 </Card>
