@@ -1,6 +1,6 @@
 // import { Download } from "@mui/icons-material";
-import { Box, Button, Card, CardContent, CardMedia, Checkbox, FormControlLabel, FormGroup, Grid, Link, List, ListItem, ListItemButton, ListItemText, ListSubheader, Stack, Switch, Toolbar, Typography } from "@mui/material";
-import React, { useState, useEffect, ChangeEvent, MouseEvent, SyntheticEvent } from "react";
+import { Box, Button, Card, CardContent, CardMedia, Checkbox, FormControlLabel, FormGroup, Grid, Link, List, ListItemButton, ListItemText, ListSubheader, Stack, Switch, Typography } from "@mui/material";
+import React, { useState, useEffect, ChangeEvent, MouseEvent } from "react";
 
 interface IDictionary {
     [index: string]: boolean;
@@ -39,7 +39,7 @@ export default function Datapack({ data }: any){
     let [urlDatapack, setUrlDatapack] = useState('');
     let [devVersion, setDevVersion] = useState(false);
 
-    const handleDevClick = (event: MouseEvent<HTMLDivElement>) => {
+    const handleDevClick = (event: MouseEvent<HTMLButtonElement>) => {
         setDevVersion(!(devVersion));
     }
 
