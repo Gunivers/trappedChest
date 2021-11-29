@@ -1,6 +1,7 @@
 // import { Download } from "@mui/icons-material";
-import { Box, Button, Card, CardContent, CardMedia, Checkbox, FormControlLabel, FormGroup, Grid, Link, List, ListItemButton, ListItemText, ListSubheader, Stack, Switch, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, CardMedia, Checkbox, Divider, FormControlLabel, FormGroup, Grid, Link, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Stack, Switch, Typography } from "@mui/material";
 import React, { useState, useEffect, ChangeEvent, MouseEvent } from "react";
+import useTranslation from 'next-translate/useTranslation'
 
 interface IDictionary {
     [index: string]: boolean;
@@ -18,8 +19,9 @@ interface ListModules {
     [index: string]: any;
 }
 
-
 export default function Datapack({ data }: any){
+
+    const { t, lang } = useTranslation('common')
 
     // let selectedVersion: DatapackVersion|null
     // let setSelectedVersion: React.Dispatch<React.SetStateAction<DatapackVersion>>|React.Dispatch<React.SetStateAction<null>>
@@ -58,17 +60,39 @@ export default function Datapack({ data }: any){
         setSelectedVersion(version);
     };
 
-    const handleModuleChange = (event: ChangeEvent<HTMLInputElement>, module: string, activeModules: IDictionary) => {
+    const handleModuleChange = (module: string, activeModules: IDictionary) => {
         // console.log('handleModuleChange')
         // let modules = activeModules
         let updatedModules: IDictionary = {}
 
-        updatedModules[module] = event.target?.checked;
+        updatedModules[module] = !(activeModules[module]);
 
         setActiveModules({
             ...activeModules,
             ...updatedModules
         })
+    }
+
+    const handleModuleAllChange = () => {
+        if(selectedVersion){
+            let updatedModules: IDictionary = {}
+
+            if ( !(selectedVersion.modules?.every( (module) => activeModules[module] == true)) ) {
+                selectedVersion.modules?.map( module => {
+                    updatedModules[module] = true;
+                })
+            }
+            else{
+                selectedVersion.modules?.map( module => {
+                    updatedModules[module] = false;
+                })
+            }
+            setActiveModules({
+                ...activeModules,
+                ...updatedModules
+            })
+        }
+        
     }
 
     useEffect(() => {
@@ -99,17 +123,28 @@ export default function Datapack({ data }: any){
                     />
                     <CardContent>
                         <Typography gutterBottom variant="h5" component="div">
-                        Gunivers-Libs
+                        { t('datapack.name') }
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                        La Glib est une librairie pour vous, datapackers, ajoutant pleins d&apos;outils et de fonctions utiles pour vos créations de contenus et de map.
+                        <Typography variant="body1" color="text.secondary">
+                        { t('datapack.description') }
                         </Typography>
                         <Stack direction="row" spacing={1} sx={{ mt: 2}}>
+                            <Link href="https://gunivers.net/gunivers-lib/">
+                                <Button variant="contained">{ t('datapack.buttons.project') }</Button>
+                            </Link>
                             <Link href="https://glib-core.readthedocs.io/en/latest/index.html">
-                                <Button variant="contained">Documentation</Button>
+                                <Button variant="contained">{ t('datapack.buttons.documentation') }</Button>
                             </Link>
                             <Link href="https://gitlab.com/Altearn/gunivers/minecraft/datapack/Glibs/glib-core">
-                                <Button variant="outlined">Git</Button>
+                                <Button variant="outlined">{ t('datapack.buttons.git') }</Button>
+                            </Link>
+                        </Stack>
+                        <Stack direction="row" spacing={2} sx={{ mt: 5}}>
+                            <Link href="https://gunivers.net/">
+                                <Typography variant="body2" color="text.secondary">{ t('datapack.by-gunivers') }</Typography>
+                            </Link>
+                            <Link href="https://gunivers.net/mentions-legales/">
+                                <Typography variant="body2" color="text.secondary">{ t('site.legal-notice') }</Typography>
                             </Link>
                         </Stack>
                     </CardContent>
@@ -119,13 +154,14 @@ export default function Datapack({ data }: any){
                 <Card sx={{ bgcolor: 'background.paper' }}>
                     <CardContent>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between'}}>
-                            <Typography variant="h5" component="div">Version</Typography>
+                            <Typography variant="h5" component="div">{ t('datapack.versions.title') }</Typography>
                             <FormControlLabel control={<Switch checked={devVersion} onClick={(event) => handleDevClick(event)} />} label="Dev" />
                         </Box>
                     </CardContent>
                     <List
                         sx={{
                             position: 'relative',
+                            maxHeight: "80vh",
                             overflow: 'auto',
                             '& ul': { padding: 0 },
                         }}
@@ -167,66 +203,59 @@ export default function Datapack({ data }: any){
                             <h1>{selectedVersion.canal} - {selectedVersion.version}</h1>
                             <Link href={urlDatapack} download>
                                 {/* <Button variant="contained" startIcon={<Download />}>Télécharger le datapack</Button> */}
-                                <Button variant="contained">Télécharger le datapack</Button>
+                                <Button variant="contained">{ t('datapack.download.btn') }</Button>
                             </Link>
                         </CardContent>
                     </Card>
+                    {selectedVersion.modules?.length != 0 &&
                     <Card>
                         <CardContent>
                             <Typography gutterBottom variant="h5" component="div">
-                            Modules
+                            { t('datapack.modules.title')}
                             </Typography>
-                            <FormGroup>
+                            <FormControlLabel
+                                label={ t('datapack.modules.all')}
+                                control={
+                                <Checkbox
+                                    checked={selectedVersion.modules?.every( (module) => activeModules[module] == true)}
+                                    indeterminate={ !(selectedVersion.modules?.every( (module) => activeModules[module] == true)) && !(selectedVersion.modules?.every( (module) => activeModules[module] == false)) }
+                                    onChange={handleModuleAllChange}
+                                />
+                                }
+                            />
+                            <Divider />
+                            <List sx={{ maxHeight: "50vh", overflowY: "auto"}}>
                             {selectedVersion.modules?.map( (module) => (
-                                    <FormControlLabel key={module} control={<Checkbox checked={activeModules[module]} onChange={(event) => handleModuleChange(event, module, activeModules)} className={'moduleBtn'}/>} label={module} />
+                                <div key={module}>
+                                    <ListItem disablePadding >
+                                        <ListItemButton onClick={(event) => handleModuleChange(module, activeModules)} dense>
+                                        <ListItemIcon>
+                                            <Checkbox
+                                            edge="start"
+                                            checked={activeModules[module]}
+                                            tabIndex={-1}
+                                            inputProps={{ 'aria-labelledby': module }}
+                                            />
+                                        </ListItemIcon>
+                                        <ListItemText id={module} primary={module} />
+                                        </ListItemButton>
+                                    </ListItem>
+                                </div>
                                 ))}
-                            </FormGroup>
+                            </List>
                         </CardContent>
                     </Card>
+
+                    }
+
                 </Stack>
                 </>
                     
                 }
             </Grid>
         </Grid>
-        <Box sx={{mt: 5, mx: 3}}>
-            
-        </Box>
-        {/* <Typography component="div" variant="h2" sx={{ mt: 9 }}>Gunivers-Libs</Typography> */}
-        {/* <Card sx={{ display: 'flex'}}>
-            <CardMedia
-                component="img"
-                sx={{ width: 140, m: 2 }}
-                image="/glib.png"
-                alt="Live from space album cover"
-            />
-            <Box>
-                <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                    Gunivers-Libs
-                </Typography>
-                <Typography variant="body2" color="text.secondary" >
-                    La Glib est une librairie pour vous, datapackers, ajoutant pleins d'outils et de fonctions utiles pour vos créations de contenus et de map.
-                </Typography>
-                </CardContent>
-            </Box>
-        </Card> */}
-            {/* <Box sx={{display: 'flex'}}>
-            {selectedVersion != null &&
-                <Box>
-                    <h1>{selectedVersion.canal} - {selectedVersion.version}</h1>
-                    <FormGroup>
-                    {selectedVersion.modules.map( (module) => (
-                            <FormControlLabel key={module} onChange={(event) => handleModuleChange(event, module, activeModules)} control={<Checkbox checked={activeModules[module]} className={'moduleBtn'}/>} label={module} />
-                        ))}
-                    </FormGroup>
-                    <Link href={urlDatapack} download>
-                        <Button variant="contained">Télécharger le datapack</Button>
-                    </Link>
-                </Box>
-            }
-            </Box> */}
-        </>
+        
+    </>
     )
 }
 

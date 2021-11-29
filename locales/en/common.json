@@ -1,0 +1,27 @@
+{
+    "site": {
+        "name": "Glib Manager",
+        "legal-notice": "Legal notice"
+    },
+    "datapack": {
+        "name": "Gunivers-Libs",
+        "description": "The Glib is a library for you, datapackers, adding many useful tools and functions for your content and map creation.",
+        "buttons":{
+            "project" : "Project",
+            "documentation" : "Documentation",
+            "git" : "Git"
+        },
+        "by-gunivers": "Create by Gunivers",
+        "versions": {
+            "title": "Versions",
+            "dev": "Dev"
+        },
+        "download": {
+            "btn": "Download datapack"
+        },
+        "modules": {
+            "title": "Modules",
+            "all" : "Available modules"
+        }
+    }
+}
