@@ -1,6 +1,5 @@
-// import { Download } from "@mui/icons-material";
 import { Avatar, Box, Button, Card, CardContent, CardMedia, Checkbox, Chip, Collapse, Divider, FormControlLabel, Grid, Link, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Stack, Switch, Typography } from "@mui/material";
-import React, { useState, useEffect, MouseEvent } from "react";
+import React, { useState, useEffect, MouseEvent, useCallback } from "react";
 import useTranslation from 'next-translate/useTranslation'
 import { TransitionGroup } from "react-transition-group";
 import { faFileArchive } from "@fortawesome/free-solid-svg-icons";
@@ -43,7 +42,7 @@ export default function Datapack({ data, minHeight }: any) {
     let [urlDatapack, setUrlDatapack] = useState('');
     let [devVersion, setDevVersion] = useState(false);
 
-    const changeVersion = (version: DatapackVersion) => {
+    const changeVersion = useCallback((version: DatapackVersion) => {
         let updatedModules: IDictionary = {}
         version.modules?.map(module => {
             if (!activeModules.hasOwnProperty(module)) {
@@ -55,7 +54,7 @@ export default function Datapack({ data, minHeight }: any) {
             ...updatedModules
         })
         setSelectedVersion(version);
-    }
+    }, [activeModules, setActiveModules])
 
     const handleDevClick = (event: MouseEvent<HTMLButtonElement>) => {
         setDevVersion(!(devVersion));
@@ -116,7 +115,7 @@ export default function Datapack({ data, minHeight }: any) {
             changeVersion(LastRelease);
         }
 
-    }, [selectedVersion, activeModules])
+    }, [selectedVersion, activeModules, changeVersion, LastRelease])
     // console.log(data)
 
     return (
