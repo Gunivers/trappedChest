@@ -39,3 +39,4 @@ yarn-error.log*
 /datapacks/dev
 /datapacks/release
 .env
+datapacks/contributors.json

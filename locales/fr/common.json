@@ -6,12 +6,13 @@
     "datapack": {
         "name": "Gunivers-Libs",
         "description": "La Glib est une librairie pour vous, datapackers, ajoutant pleins d'outils et de fonctions utiles pour vos créations de contenus et de map.",
-        "buttons":{
-            "project" : "Projet",
-            "documentation" : "Documentation",
-            "git" : "Git"
+        "buttons": {
+            "project": "Projet",
+            "documentation": "Documentation",
+            "git": "Git"
         },
         "by-gunivers": "Créé par Gunivers",
+        "contributors": "Contributeurs",
         "versions": {
             "title": "Versions",
             "dev": "Dev"

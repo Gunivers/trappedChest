@@ -25,6 +25,52 @@ const theme = createTheme({
       },
     },
   },
+  typography: {
+    fontFamily: '"Open Sans", sans-serif',
+    h1: {
+      fontFamily: '"Rajdhani", sans-serif',
+      fontSize: "80px",
+      fontWeight: 400,
+      lineHeight: "1em",
+      letterSpacing: "-0.02em",
+    },
+    h2: {
+      fontFamily: '"Rajdhani", sans-serif',
+      fontSize: "60px",
+      fontWeight: 400,
+      lineHeight: "1em",
+      letterSpacing: "-0.02em",
+    },
+    h3: {
+      fontFamily: '"Rajdhani", sans-serif',
+      fontSize: "25px",
+      fontWeight: 400,
+      lineHeight: "1em",
+      letterSpacing: "-0.02em",
+    },
+    h4: {
+      fontFamily: '"Rajdhani", sans-serif',
+      fontSize: "25px",
+      fontWeight: 400,
+      lineHeight: "1em",
+      letterSpacing: 0,
+    },
+    h5: {
+      fontFamily: '"Rajdhani", sans-serif',
+      fontSize: "20px",
+      fontWeight: 400,
+      lineHeight: "1.5em",
+      letterSpacing: 0,
+    },
+    h6: {
+      fontFamily: '"Rajdhani", sans-serif',
+      fontSize: "14px",
+      fontWeight: 400,
+      lineHeight: "1.43em",
+      letterSpacing: 0,
+    },
+
+  },
 });
 
 
