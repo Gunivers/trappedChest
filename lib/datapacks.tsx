@@ -194,5 +194,5 @@ export async function getContributors() {
 
 export async function getGlib() {
 
-    return { devs: getDevs(), releases: getReleases(), contributors: await getContributors() }
+    return { devs: getDevs(), releases: getReleases(), contributors: await getContributors(), required_modules: process.env.REQUIRED_MODULES?.split(';') }
 }

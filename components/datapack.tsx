@@ -71,7 +71,12 @@ export default function Datapack({ data, minHeight }: any) {
         // let modules = activeModules
         let updatedModules: IDictionary = {}
 
-        updatedModules[module] = !(activeModules[module]);
+        if ( !(data.required_modules.includes(module)) ){
+            updatedModules[module] = !(activeModules[module]);
+        }
+        else{
+            updatedModules[module] = true
+        }
 
         setActiveModules({
             ...activeModules,
@@ -90,7 +95,9 @@ export default function Datapack({ data, minHeight }: any) {
             }
             else {
                 selectedVersion.modules?.map(module => {
-                    updatedModules[module] = false;
+                    if ( !(data.required_modules.includes(module)) ){
+                        updatedModules[module] = false;
+                    }
                 })
             }
             setActiveModules({
@@ -168,6 +175,16 @@ export default function Datapack({ data, minHeight }: any) {
                                 </Box>
                             </CardContent>
                         </Card>
+                        <Card>
+                            <Box sx={{display: 'flex', flexWrap: 'wrap', '& > *': { mr: 1} }}>
+                                <a href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn" title="Louez votre serveur haute qualité, profitez pleinement de vos jeux préférés">
+                                    <img src="https://mtxserv.com/build/img/banners/serveur_minecraft.png" height="80"/>
+                                </a>
+                                <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                                    <p>Merci à notre partenaire <a style={{textDecoration: 'underline'}} href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn">mTxServ</a> !</p>
+                                </Box>
+                            </Box>
+                        </Card>
                     </Stack>
                 </Grid>
                 <Grid item xs={1} md={1} lg={1} className={"heightViewport"}>
@@ -244,6 +261,7 @@ export default function Datapack({ data, minHeight }: any) {
                                                                         checked={activeModules[module]}
                                                                         tabIndex={-1}
                                                                         inputProps={{ 'aria-labelledby': module }}
+                                                                        disabled={data.required_modules?.includes(module)}
                                                                     />
                                                                 </ListItemIcon>
                                                                 <ListItemText id={module} primary={module} />

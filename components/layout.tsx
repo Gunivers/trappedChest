@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AppBar, Stack, Toolbar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import Head from "next/head";
-import { ComponentProps, useEffect, useState, useRef } from "react";
+import { useRef } from "react";
 import Link from 'next/link'
 import useTranslation from "next-translate/useTranslation";
 import useResizeObserver from "@react-hook/resize-observer";
