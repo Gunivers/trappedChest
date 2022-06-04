@@ -151,7 +151,7 @@ export default function Datapack({ data, minHeight }: any) {
                                     <Link href="https://glib-core.readthedocs.io/en/latest/index.html">
                                         <Button variant="contained">{t('datapack.buttons.documentation')}</Button>
                                     </Link>
-                                    <Link href="https://gitlab.com/Altearn/gunivers/minecraft/datapack/Glibs/glib-core">
+                                    <Link href="https://github.com/Gunivers/Glib">
                                         <Button variant="outlined">{t('datapack.buttons.git')}</Button>
                                     </Link>
                                 </Box>
