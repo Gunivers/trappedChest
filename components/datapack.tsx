@@ -27,9 +27,14 @@ export default function Datapack({ data, minHeight }: any) {
 
     // let selectedVersion: DatapackVersion|null
     // let setSelectedVersion: React.Dispatch<React.SetStateAction<DatapackVersion>>|React.Dispatch<React.SetStateAction<null>>
-    // console.log(data)
-    const lastCanal = data.releases[Object.keys(data.releases)[0]];
-    const LastRelease: DatapackVersion = lastCanal.versions[0]
+    console.log(data)
+
+    let LastRelease = null
+
+    if (data.releases.length > 0) {
+        const lastCanal = data.releases[Object.keys(data.releases)[0]];
+        LastRelease = DatapackVersion = lastCanal.versions[0]
+    }
 
     let [selectedVersion, setSelectedVersion] = React.useState<DatapackVersion | null>(null);
     // setSelectedVersion(data.releases[Object.keys(data.releases)[Object.keys(data.releases).length - 1]].versions.pop())
@@ -43,6 +48,7 @@ export default function Datapack({ data, minHeight }: any) {
     let [devVersion, setDevVersion] = useState(false);
 
     const changeVersion = useCallback((version: DatapackVersion) => {
+        if (version == null ) {return}
         let updatedModules: IDictionary = {}
         version.modules?.map(module => {
             if (!activeModules.hasOwnProperty(module)) {

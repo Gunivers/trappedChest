@@ -1,4 +1,5 @@
 import axios from "axios";
+import { SlowBuffer } from "buffer";
 import fs from "fs"
 import path from 'path';
 
@@ -10,61 +11,71 @@ interface DatapackVersion {
     modules?: string[] | null
 }
 
+function parseFolder(folder: string, commitSha: string) {
+    let datapack: DatapackVersion = {
+        canal: null,
+        type: null,
+        version: null,
+        commit: commitSha,
+    }
+
+    if (folder.startsWith('dev/')) {
+        datapack.canal = folder.split('/')[1]
+        datapack.type = 'dev'
+        datapack.version = 'dev'
+    } else if (folder.startsWith('release/')) {
+        let releaseName = folder.slice(folder.split('/')[0].length + 1)
+        datapack.canal = releaseName.split('-')[0]
+        datapack.version = releaseName.slice(datapack.canal.length + 1)
+        datapack.type = 'release'
+    }
+
+    let modules = []
+
+    try {
+        modules = fs.readdirSync(path.resolve('datapacks/' + folder + '/data'), { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name)
+    } catch (error) {
+        return
+    }
+
+    if (modules.indexOf('minecraft') > -1) {
+        modules.splice(modules.indexOf('minecraft'), 1);
+    }
+
+    datapack.modules = modules
+
+    try {
+        fs.writeFileSync(path.resolve('datapacks/' + folder + '/package.json'), JSON.stringify(datapack));
+        return datapack
+    } catch (error) {
+        return
+    }
+}
+
 function getPackage(folder: string): DatapackVersion | void {
     let commitSha: string
     try {
-        commitSha = fs.readFileSync(path.resolve('datapacks/' + folder + '/available.txt'), { encoding: 'utf8' })
+        commitSha = fs.readFileSync(path.resolve('datapacks/' + folder + '/.revision'), { encoding: 'utf8' })
     } catch (e) {
         return
     }
 
-    let versionRaw
+    commitSha = commitSha.substring(0, 7)
+
+    let version
     try {
-        versionRaw = fs.readFileSync(path.resolve('datapacks/' + folder + '/package.json'), { encoding: 'utf8' })
+        const versionRaw = fs.readFileSync(path.resolve('datapacks/' + folder + '/package.json'), { encoding: 'utf8' })
+        version = JSON.parse(versionRaw)
+        if (version.commit !== commitSha) {
+            version = parseFolder(folder, commitSha)
+        }
 
     } catch (error) {
-        let datapack: DatapackVersion = {
-            canal: null,
-            type: null,
-            version: null,
-            commit: commitSha,
-        }
-
-        if (folder.startsWith('dev/')) {
-            datapack.canal = folder.split('/')[1]
-            datapack.type = 'dev'
-            datapack.version = 'dev'
-        } else if (folder.startsWith('release/')) {
-            let releaseName = folder.slice(folder.split('/')[0].length + 1)
-            datapack.canal = releaseName.split('-')[0]
-            datapack.version = releaseName.slice(datapack.canal.length + 1)
-            datapack.type = 'release'
-        }
-
-        let modules = []
-
-        try {
-            modules = fs.readdirSync(path.resolve('datapacks/' + folder + '/data'), { withFileTypes: true })
-                .filter(dirent => dirent.isDirectory())
-                .map(dirent => dirent.name)
-        } catch (error) {
-            return
-        }
-
-        if (modules.indexOf('minecraft') > -1) {
-            modules.splice(modules.indexOf('minecraft'), 1);
-        }
-
-        datapack.modules = modules
-
-        try {
-            fs.writeFileSync(path.resolve('datapacks/' + folder + '/package.json'), JSON.stringify(datapack));
-            return datapack
-        } catch (error) {
-            return
-        }
+        version = parseFolder(folder, commitSha)
     }
-    return JSON.parse(versionRaw)
+    return version
 
 }
 
@@ -100,17 +111,9 @@ export function getDevs() {
 
     for (let canal of canals) {
 
-        let latest: string
-
-        try {
-            latest = fs.readFileSync(path.resolve('datapacks/dev/' + canal + '/latest.txt'), { encoding: 'utf8' })
-        } catch (e) {
-            continue
-        }
-
         // console.log(latest)
 
-        let datapack: DatapackVersion | void = getPackage(`dev/${canal}/${latest}`)
+        let datapack: DatapackVersion | void = getPackage(`dev/${canal}`)
 
 
         if (datapack) {
