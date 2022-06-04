@@ -27,13 +27,12 @@ export default function Datapack({ data, minHeight }: any) {
 
     // let selectedVersion: DatapackVersion|null
     // let setSelectedVersion: React.Dispatch<React.SetStateAction<DatapackVersion>>|React.Dispatch<React.SetStateAction<null>>
-    console.log(data)
 
-    let LastRelease = null
+    let LastRelease: DatapackVersion|null = null
 
-    if (data.releases.length > 0) {
+    if (data.releases != null) {
         const lastCanal = data.releases[Object.keys(data.releases)[0]];
-        LastRelease = DatapackVersion = lastCanal.versions[0]
+        LastRelease = lastCanal.versions[0]
     }
 
     let [selectedVersion, setSelectedVersion] = React.useState<DatapackVersion | null>(null);
@@ -47,7 +46,7 @@ export default function Datapack({ data, minHeight }: any) {
     let [urlDatapack, setUrlDatapack] = useState('');
     let [devVersion, setDevVersion] = useState(false);
 
-    const changeVersion = useCallback((version: DatapackVersion) => {
+    const changeVersion = useCallback((version: DatapackVersion|null) => {
         if (version == null ) {return}
         let updatedModules: IDictionary = {}
         version.modules?.map(module => {
@@ -184,7 +183,7 @@ export default function Datapack({ data, minHeight }: any) {
                         <Card>
                             <Box sx={{display: 'flex', flexWrap: 'wrap', '& > *': { mr: 1} }}>
                                 <a href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn" title="Louez votre serveur haute qualité, profitez pleinement de vos jeux préférés">
-                                    <img src="https://mtxserv.com/build/img/banners/serveur_minecraft.png" height="80"/>
+                                    <img src="https://mtxserv.com/build/img/banners/serveur_minecraft.png" height="80" alt='MTxServ'/>
                                 </a>
                                 <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
                                     <p>Merci à notre partenaire <a style={{textDecoration: 'underline'}} href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn">mTxServ</a> !</p>
