@@ -1,9 +1,34 @@
-import { Avatar, Box, Button, Card, CardContent, CardMedia, Checkbox, Chip, Collapse, Divider, FormControlLabel, Grid, Link, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Stack, Switch, Typography } from "@mui/material";
+import {
+    Avatar,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    CardMedia,
+    Checkbox,
+    Chip,
+    Collapse,
+    Divider,
+    FormControlLabel,
+    Grid,
+    Link,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    ListSubheader,
+    Stack,
+    Switch,
+    Tooltip,
+    Typography
+} from "@mui/material";
 import React, { useState, useEffect, MouseEvent, useCallback } from "react";
 import useTranslation from 'next-translate/useTranslation'
 import { TransitionGroup } from "react-transition-group";
 import { faFileArchive } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {Contributor} from "../lib/datapacks";
 
 interface IDictionary {
     [index: string]: boolean;
@@ -161,8 +186,12 @@ export default function Datapack({ data, minHeight }: any) {
                             <CardContent>
                                 <Typography variant="h3" gutterBottom>{t('datapack.contributors')}</Typography>
                                 <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', '& > *': { mr: "8px!important" as "8px", mb: "8px!important" as "8px" } }}>
-                                    {Object.keys(data.contributors).map((email: string) => (
-                                        <Avatar key={email} src={data.contributors[email]} alt={email} />
+                                    {data.contributors?.map((contributor: Contributor) => (
+                                        <Tooltip key={contributor.id} title={contributor.login}>
+                                            <Link href={contributor.url}>
+                                                <Avatar src={contributor.avatar_url} alt={contributor.login} />
+                                            </Link>
+                                        </Tooltip>
                                     ))}
                                 </Box>
                                 <Box sx={{ mt: 3, display: 'flex', flexWrap: 'wrap', '& > *': { mr: 1, mb: 1 } }}>

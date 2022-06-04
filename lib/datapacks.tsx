@@ -159,37 +159,57 @@ export function getReleases(): IDictionary {
     return canals
 }
 
-export async function getContributors() {
+export interface Contributor {
+    login: string,
+    avatar_url: string,
+    url: string,
+    id: number
+}
 
-    interface EmailAvatar {
-        [index: string]: string;
-    }
+export async function getContributors(): Promise<Contributor[] | undefined> {
 
-    const contributorsFile = 'datapacks/contributors.json'
-    let contributors = {} as EmailAvatar
     try {
-        let contributorsRaw = fs.readFileSync(path.resolve(contributorsFile), { encoding: 'utf8' })
-        contributors = JSON.parse(contributorsRaw)
-    } catch (e) {
-        try {
-            let avatars = {} as EmailAvatar
-            let emails: string[] | undefined = process.env.CONTRIBUTORS?.split(';')
-            if (emails) {
-                for (const email of emails) {
-                    await axios.get(`https://gitlab.com/api/v4/avatar?email=${email}&size=64`)
-                        .then(response => {
-                            avatars[email] = response.data.avatar_url;
-                        })
-                }
-                fs.writeFileSync(path.resolve(contributorsFile), JSON.stringify(avatars));
-                contributors = avatars;
-            }
-
-        } catch (error) {
-            contributors = {}
-        }
+        let contributors: Contributor[] = []
+        console.log("query")
+        const req1 = axios.get<Contributor[]>(`https://api.github.com/repos/Gunivers/Glib/contributors`)
+        const req2 = axios.get<Contributor[]>(`https://api.github.com/repos/Gunivers/Glib-Manager/contributors`)
+        await axios.all([req1, req2])
+            .then(value => contributors = [...value[0].data, ...value[1].data])
+        return Array.from(contributors.reduce((entryMap, e: Contributor) =>
+                entryMap.set(e.id, [...entryMap.get(e.id)||[], e]),
+            new Map<number, Contributor[]>())
+            .values()).flatMap(contributors => contributors[0])
+            .map(contributor => { return { url: `https://github.com/${contributor.login}`, login: contributor.login, avatar_url: contributor.avatar_url, id: contributor.id}})
+        // return contributors
+    } catch {
+        return undefined
     }
-    return contributors
+
+    // const contributorsFile = 'datapacks/contributors.json'
+    // //let contributors = {} as Contributor
+    // try {
+    //     let contributorsRaw = fs.readFileSync(path.resolve(contributorsFile), { encoding: 'utf8' })
+    //     contributors = JSON.parse(contributorsRaw)
+    // } catch (e) {
+    //     try {
+    //         let avatars = {} as Contributor
+    //         let emails: string[] | undefined = process.env.CONTRIBUTORS?.split(';')
+    //         if (emails) {
+    //             for (const email of emails) {
+    //                 await axios.get(`https://gitlab.com/api/v4/avatar?email=${email}&size=64`)
+    //                     .then(response => {
+    //                         avatars[email] = response.data.avatar_url;
+    //                     })
+    //             }
+    //             fs.writeFileSync(path.resolve(contributorsFile), JSON.stringify(avatars));
+    //             contributors = avatars;
+    //         }
+    //
+    //     } catch (error) {
+    //         contributors = {}
+    //     }
+    // }
+    // return contributors
 }
 
 export async function getGlib() {
