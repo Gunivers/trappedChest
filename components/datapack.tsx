@@ -29,6 +29,7 @@ import { TransitionGroup } from "react-transition-group";
 import { faFileArchive } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {Contributor} from "../lib/datapacks";
+import FavoriteIcon from '@mui/icons-material/Favorite';
 
 interface IDictionary {
     [index: string]: boolean;
@@ -57,7 +58,7 @@ export default function Datapack({ data, minHeight }: any) {
 
     if (data.releases != null) {
         const lastCanal = data.releases[Object.keys(data.releases)[0]];
-        LastRelease = lastCanal.versions[0]
+        LastRelease = lastCanal?.versions[0]
     }
 
     let [selectedVersion, setSelectedVersion] = React.useState<DatapackVersion | null>(null);
@@ -183,6 +184,9 @@ export default function Datapack({ data, minHeight }: any) {
                                     </Link>
                                     <Link href="https://github.com/Gunivers/Glib">
                                         <Button variant="outlined">{t('datapack.buttons.git')}</Button>
+                                    </Link>
+                                    <Link href="https://utip.io/gunivers">
+                                        <Button variant="outlined" endIcon={<FavoriteIcon />}>{t('datapack.buttons.utip')}</Button>
                                     </Link>
                                 </Box>
                             </CardContent>

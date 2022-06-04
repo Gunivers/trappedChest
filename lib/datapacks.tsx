@@ -173,7 +173,6 @@ export async function getContributors(): Promise<Contributor[] | undefined> {
 
     try {
         let contributors: Contributor[] = []
-        console.log("query")
         const req1 = axios.get<Contributor[]>(`https://api.github.com/repos/Gunivers/Glib/contributors`)
         const req2 = axios.get<Contributor[]>(`https://api.github.com/repos/Gunivers/Glib-Manager/contributors`)
         await axios.all([req1, req2])

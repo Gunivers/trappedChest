@@ -9,7 +9,8 @@
         "buttons": {
             "project": "Projet",
             "documentation": "Documentation",
-            "git": "Git"
+            "git": "Git",
+            "utip": "Soutenez-nous"
         },
         "by-gunivers": "Créé par Gunivers",
         "contributors": "Contributeurs",
