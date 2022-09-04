@@ -4,6 +4,7 @@ import Layout from '../components/layout'
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material'
 import { config } from '@fortawesome/fontawesome-svg-core'
 import '@fortawesome/fontawesome-svg-core/styles.css'
+import { SnackbarProvider } from 'notistack';
 config.autoAddCss = false
 
 const theme = createTheme({
@@ -79,7 +80,9 @@ function MyApp({ Component, pageProps }: AppProps) {
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Component {...pageProps} />
+        <SnackbarProvider maxSnack={5} autoHideDuration={3000}>
+          <Component {...pageProps} />
+        </SnackbarProvider>
       </ThemeProvider>
     </>
   )

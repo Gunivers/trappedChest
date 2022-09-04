@@ -36,6 +36,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+.save
+
 /datapacks/dev
 /datapacks/release
 .env

@@ -19,8 +19,13 @@
             "dev": "Dev"
         },
         "download": {
-            "btn": "Télécharger le datapack"
+            "btn": "Télécharger le datapack",
+            "load": "Préparation en cours",
+            "startLoading": "La préparation du téléchargement a commencé",
+            "success": "Le téléchargement est pret !",
+            "independent": "Télécharger indépendamment"
         },
+        "independentWarn": "N'oubliez pas de télécharger les modules principaux aussi !",
         "modules": {
             "title": "Modules",
             "all": "Modules disponibles"

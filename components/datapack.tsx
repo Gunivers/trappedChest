@@ -1,35 +1,16 @@
-import {
-    Avatar,
-    Box,
-    Button,
-    Card,
-    CardContent,
-    CardMedia,
-    Checkbox,
-    Chip,
-    Collapse,
-    Divider,
-    FormControlLabel,
-    Grid,
-    Link,
-    List,
-    ListItem,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    ListSubheader,
-    Stack,
-    Switch,
-    Tooltip,
-    Typography
-} from "@mui/material";
+import { Avatar, Box, IconButton, Button, Card, CardContent, Snackbar, CardMedia, Checkbox, Chip, Collapse, Divider, FormControlLabel, Grid, Link, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Stack, Switch, Tooltip, Typography } from "@mui/material";
 import React, { useState, useEffect, MouseEvent, useCallback } from "react";
 import useTranslation from 'next-translate/useTranslation'
 import { TransitionGroup } from "react-transition-group";
 import { faFileArchive } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {Contributor} from "../lib/datapacks";
+import { Contributor } from "../lib/datapacks";
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import fileDownload from 'js-file-download'
+import LoadingButton from '@mui/lab/LoadingButton';
+import CountUp from 'react-countup';
+import { useSnackbar } from 'notistack';
+import DownloadIcon from '@mui/icons-material/Download';
 
 interface IDictionary {
     [index: string]: boolean;
@@ -54,7 +35,7 @@ export default function Datapack({ data, minHeight }: any) {
     // let selectedVersion: DatapackVersion|null
     // let setSelectedVersion: React.Dispatch<React.SetStateAction<DatapackVersion>>|React.Dispatch<React.SetStateAction<null>>
 
-    let LastRelease: DatapackVersion|null = null
+    let LastRelease: DatapackVersion | null = null
 
     if (data.releases != null) {
         const lastCanal = data.releases[Object.keys(data.releases)[0]];
@@ -71,9 +52,15 @@ export default function Datapack({ data, minHeight }: any) {
     [activeModules, setActiveModules] = useState({});
     let [urlDatapack, setUrlDatapack] = useState('');
     let [devVersion, setDevVersion] = useState(false);
+    let [isDownloading, setIsDownloading] = useState(false);
+    let [downloadAsIndependent, setDownloadAsIndependent] = useState(false);
 
-    const changeVersion = useCallback((version: DatapackVersion|null) => {
-        if (version == null ) {return}
+    let [downloadNumber, setDownloadNumber] = useState(1);
+
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+    const changeVersion = useCallback((version: DatapackVersion | null) => {
+        if (version == null) { return }
         let updatedModules: IDictionary = {}
         version.modules?.map(module => {
             if (!activeModules.hasOwnProperty(module)) {
@@ -91,6 +78,15 @@ export default function Datapack({ data, minHeight }: any) {
         setDevVersion(!(devVersion));
     }
 
+    let [independentWarning, setIndependentWarning] = useState(true);
+    const handleIndependentClick = (event: MouseEvent<HTMLButtonElement>) => {
+        setDownloadAsIndependent(!(downloadAsIndependent));
+        if(!downloadAsIndependent && independentWarning){
+            enqueueSnackbar(t('datapack.independentWarn'), { variant: "warning", autoHideDuration: 10000 });
+            setIndependentWarning(false);
+        }
+    }
+
     const handleListItemClick = (event: MouseEvent<HTMLDivElement>, version: DatapackVersion) => {
         // console.log('handleListItemClick')
         changeVersion(version);
@@ -102,10 +98,10 @@ export default function Datapack({ data, minHeight }: any) {
         // let modules = activeModules
         let updatedModules: IDictionary = {}
 
-        if ( !(data.required_modules.includes(module)) ){
+        if (!(data.required_modules.includes(module))) {
             updatedModules[module] = !(activeModules[module]);
         }
-        else{
+        else {
             updatedModules[module] = true
         }
 
@@ -126,7 +122,7 @@ export default function Datapack({ data, minHeight }: any) {
             }
             else {
                 selectedVersion.modules?.map(module => {
-                    if ( !(data.required_modules.includes(module)) ){
+                    if (!(data.required_modules.includes(module))) {
                         updatedModules[module] = false;
                     }
                 })
@@ -139,7 +135,16 @@ export default function Datapack({ data, minHeight }: any) {
 
     }
 
+    async function updateDownloadCounter() {
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/counter`)
+        const data = await res.json()
+
+        setDownloadNumber(data.download);
+    }
+    updateDownloadCounter()
     useEffect(() => {
+
 
         if (selectedVersion) {
             let modules = [] as unknown as ListModules;
@@ -148,13 +153,36 @@ export default function Datapack({ data, minHeight }: any) {
                     modules.push(module)
                 }
             })
-            setUrlDatapack(`api/datapacks/${selectedVersion.canal}/${selectedVersion.version}/${selectedVersion.commit}/${modules.join('|')}`)
+            setUrlDatapack(`/api/datapacks/${selectedVersion.canal}/${selectedVersion.version}/${selectedVersion.commit}/${modules.join('|')}`)
         } else {
             changeVersion(LastRelease);
         }
 
     }, [selectedVersion, activeModules, changeVersion, LastRelease])
     // console.log(data)
+    async function downloadFromButton(){
+        if (selectedVersion) {
+            enqueueSnackbar(t('datapack.download.startLoading'), { variant: "info" });
+            await download(urlDatapack, `Glibs-${selectedVersion.version}.zip`)
+            enqueueSnackbar(t('datapack.download.success'), { variant: "success" });
+        }
+    }
+    async function downloadIndependant(id:string){
+        if (selectedVersion) {
+            enqueueSnackbar(t('datapack.download.startLoading'), { variant: "info" });
+            await download(`/api/datapacks/${selectedVersion.canal}/${selectedVersion.version}/${selectedVersion.commit}/${id}`, `${id.split('.').join('-')}.zip`)
+            enqueueSnackbar(t('datapack.download.success'), { variant: "success" });
+        }
+    }
+    async function download(url:string, name:string) {
+        if (selectedVersion) {
+            await setIsDownloading(true)
+            const res = await fetch(`${process.env.NEXT_PUBLIC_URL}${url}`)
+            const data = await res.arrayBuffer()
+            fileDownload(data, name);
+            await setIsDownloading(false)
+        }
+    }
 
     return (
         <>
@@ -193,6 +221,22 @@ export default function Datapack({ data, minHeight }: any) {
                         </Card>
                         <Card>
                             <CardContent>
+                                <Typography variant="h3" gutterBottom>{'Téléchargements'}</Typography>
+                                <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', '& > *': { mr: "8px!important" as "8px", mb: "8px!important" as "8px" } }}>
+                                    <Typography variant="body1" color="text.secondary">
+                                        <CountUp
+                                            start={0}
+                                            end={downloadNumber}
+                                            duration={2.75}
+                                            separator=" "
+                                            suffix=" downloads"
+                                        />
+                                    </Typography>
+                                </Box>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent>
                                 <Typography variant="h3" gutterBottom>{t('datapack.contributors')}</Typography>
                                 <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', '& > *': { mr: "8px!important" as "8px", mb: "8px!important" as "8px" } }}>
                                     {data.contributors?.map((contributor: Contributor) => (
@@ -214,12 +258,12 @@ export default function Datapack({ data, minHeight }: any) {
                             </CardContent>
                         </Card>
                         <Card>
-                            <Box sx={{display: 'flex', flexWrap: 'wrap', '& > *': { mr: 1} }}>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', '& > *': { mr: 1 } }}>
                                 <a href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn" title="Louez votre serveur haute qualité, profitez pleinement de vos jeux préférés">
-                                    <img src="https://mtxserv.com/build/img/banners/serveur_minecraft.png" height="80" alt='MTxServ'/>
+                                    <img src="https://mtxserv.com/build/img/banners/serveur_minecraft.png" height="80" alt='MTxServ' />
                                 </a>
-                                <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-                                    <p>Merci à notre partenaire <a style={{textDecoration: 'underline'}} href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn">mTxServ</a> !</p>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                    <p>Merci à notre partenaire <a style={{ textDecoration: 'underline' }} href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn">mTxServ</a> !</p>
                                 </Box>
                             </Box>
                         </Card>
@@ -264,9 +308,10 @@ export default function Datapack({ data, minHeight }: any) {
                                             <Typography variant="h2">{selectedVersion.canal} - {selectedVersion.version}</Typography>
                                             <Chip label={selectedVersion.commit} size="small" />
                                         </Stack>
-                                        <Link href={urlDatapack} download>
-                                            <Button variant="contained" startIcon={<FontAwesomeIcon icon={faFileArchive} />}>{t('datapack.download.btn')}</Button>
-                                        </Link>
+                                        <Box>
+                                            <LoadingButton loadingPosition="start" loading={isDownloading} variant="contained" onClick={() => downloadFromButton()} startIcon={<FontAwesomeIcon icon={faFileArchive} />}>{isDownloading ? t('datapack.download.load') : t('datapack.download.btn')}</LoadingButton>
+                                            <Typography variant="body2" color="text.secondary" sx={{ p: 0, m: 0 }}>{isDownloading ? `` : ''}</Typography>
+                                        </Box>
                                     </Stack>
                                 </CardContent>
                             </Card>
@@ -276,6 +321,7 @@ export default function Datapack({ data, minHeight }: any) {
                                         <Typography gutterBottom variant="h3">
                                             {t('datapack.modules.title')}
                                         </Typography>
+
                                         <FormControlLabel
                                             label={t('datapack.modules.all')}
                                             control={
@@ -291,7 +337,12 @@ export default function Datapack({ data, minHeight }: any) {
                                             <TransitionGroup>
                                                 {selectedVersion.modules?.map((module) => (
                                                     <Collapse key={module}>
-                                                        <ListItem disablePadding >
+                                                        <ListItem disablePadding secondaryAction={
+                                                            downloadAsIndependent && (
+                                                                <IconButton edge="end" aria-label="delete" onClick={() => downloadIndependant(module)}>
+                                                                    <DownloadIcon />
+                                                                </IconButton>
+                                                            )}>
                                                             <ListItemButton onClick={(event) => handleModuleChange(module, activeModules)} dense>
                                                                 <ListItemIcon>
                                                                     <Checkbox
@@ -309,6 +360,9 @@ export default function Datapack({ data, minHeight }: any) {
                                                 ))}
                                             </TransitionGroup>
                                         </List>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <FormControlLabel control={<Switch checked={downloadAsIndependent} onClick={(event) => handleIndependentClick(event)} />} label={t('datapack.download.independent')} />
+                                        </Box>
                                     </CardContent>
                                 </Card>
                             }
@@ -316,7 +370,6 @@ export default function Datapack({ data, minHeight }: any) {
                     </Grid>
                 }
             </Grid>
-
         </>
     )
 }

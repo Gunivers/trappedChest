@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 2021",
+    "start": "next start -p 50212",
     "lint": "next lint"
   },
   "dependencies": {
@@ -17,13 +17,17 @@
     "@fortawesome/free-solid-svg-icons": "^6.0.0-beta3",
     "@fortawesome/react-fontawesome": "^0.1.16",
     "@mui/icons-material": "^5.8.2",
+    "@mui/lab": "^5.0.0-alpha.97",
     "@mui/material": "^5.0.6",
     "@react-hook/resize-observer": "^1.2.5",
     "adm-zip": "^0.5.9",
     "axios": "^0.24.0",
+    "js-file-download": "^0.4.12",
     "next": "^12.1.6",
     "next-translate": "^1.2.0",
+    "notistack": "^2.0.5",
     "react": "17.0.2",
+    "react-countup": "^6.3.1",
     "react-dom": "17.0.2",
     "react-transition-group": "^4.4.2"
   },
