@@ -20,6 +20,7 @@ export default Home
 
 export async function getServerSideProps() {
   const glib: {} | null = await getGlib()
+  //console.log(glib)
   return {
     props:
       JSON.parse(JSON.stringify(glib))

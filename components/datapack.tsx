@@ -11,6 +11,8 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import CountUp from 'react-countup';
 import { useSnackbar } from 'notistack';
 import DownloadIcon from '@mui/icons-material/Download';
+import PublicIcon from '@mui/icons-material/Public';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 
 interface IDictionary {
     [index: string]: boolean;
@@ -22,6 +24,7 @@ interface DatapackVersion {
     type?: 'dev' | 'release' | null,
     commit?: string,
     modules?: string[] | null
+    world?: boolean | null
 }
 
 interface ListModules {
@@ -54,6 +57,7 @@ export default function Datapack({ data, minHeight }: any) {
     let [devVersion, setDevVersion] = useState(false);
     let [isDownloading, setIsDownloading] = useState(false);
     let [downloadAsIndependent, setDownloadAsIndependent] = useState(false);
+    let [downloadWithMap, setDownloadWithMap] = useState(false);
 
     let [downloadNumber, setDownloadNumber] = useState(1);
 
@@ -72,6 +76,10 @@ export default function Datapack({ data, minHeight }: any) {
             ...updatedModules
         })
         setSelectedVersion(version);
+
+        if(!version?.world){
+            setDownloadWithMap(false);
+        }
     }, [activeModules, setActiveModules])
 
     const handleDevClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -113,6 +121,7 @@ export default function Datapack({ data, minHeight }: any) {
 
     const handleModuleAllChange = () => {
         if (selectedVersion) {
+
             let updatedModules: IDictionary = {}
 
             if (!(selectedVersion.modules?.every((module) => activeModules[module] == true))) {
@@ -163,7 +172,7 @@ export default function Datapack({ data, minHeight }: any) {
     async function downloadFromButton(){
         if (selectedVersion) {
             enqueueSnackbar(t('datapack.download.startLoading'), { variant: "info" });
-            await download(urlDatapack, `Glibs-${selectedVersion.version}.zip`)
+            await download(urlDatapack + (downloadWithMap ? '?world=true' : ''), `Glibs-${selectedVersion.version}.zip`)
             enqueueSnackbar(t('datapack.download.success'), { variant: "success" });
         }
     }
@@ -309,7 +318,8 @@ export default function Datapack({ data, minHeight }: any) {
                                             <Chip label={selectedVersion.commit} size="small" />
                                         </Stack>
                                         <Box>
-                                            <LoadingButton loadingPosition="start" loading={isDownloading} variant="contained" onClick={() => downloadFromButton()} startIcon={<FontAwesomeIcon icon={faFileArchive} />}>{isDownloading ? t('datapack.download.load') : t('datapack.download.btn')}</LoadingButton>
+                                            <LoadingButton loadingPosition="start" loading={isDownloading} variant="contained" onClick={() => downloadFromButton()} startIcon={<FontAwesomeIcon icon={faFileArchive} />}>{isDownloading ? t('datapack.download.load') : downloadWithMap ? t('datapack.download.btnw') : t('datapack.download.btn')}</LoadingButton>
+                                            <IconButton disabled={!selectedVersion.world} color={selectedVersion.world ? 'success' : 'default'} onClick={() => setDownloadWithMap(!downloadWithMap)}>{downloadWithMap ? (<FolderOpenIcon/>) : (<PublicIcon/>)}</IconButton>
                                             <Typography variant="body2" color="text.secondary" sx={{ p: 0, m: 0 }}>{isDownloading ? `` : ''}</Typography>
                                         </Box>
                                     </Stack>

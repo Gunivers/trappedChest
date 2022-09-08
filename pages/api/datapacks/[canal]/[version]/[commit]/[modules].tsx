@@ -8,6 +8,11 @@ export default function (req: any, res: any) {
 
   // console.log(req.query)
 
+  let basePath = "";
+
+
+
+
   let path = `datapacks/release/${req.query.canal}-${req.query.version}`
 
   if (req.query.version == 'dev') {
@@ -31,15 +36,34 @@ export default function (req: any, res: any) {
 
   let zip = new AdmZip();
 
+  if (req.query.world === 'true') {
+    basePath = "datapacks/"
+    let pathW = `worlds/release/${req.query.canal}-${req.query.version}`
+
+    if (req.query.version == 'dev') {
+      pathW = `worlds/dev/${req.query.canal}`;
+    }
+
+    zip.addLocalFolder(resolve(pathW + '/region'), 'region/');
+
+    ['icon.png', 'level.dat'].forEach(file => {
+      try {
+        zip.addLocalFile(resolve(pathW + '/' + file))
+      } catch (error) {
+        return
+      }
+    });
+  }
+
   ['icon.png', 'pack.mcmeta', 'LICENSE'].forEach(file => {
     try {
-      zip.addLocalFile(resolve(path + '/' + file))
+      zip.addLocalFile(resolve(path + '/' + file), basePath)
     } catch (error) {
       return
     }
   });
 
-  zip.addLocalFolder(resolve(path + '/data/minecraft'), '/data/minecraft')
+  zip.addLocalFolder(resolve(path + '/data/minecraft'), basePath + '/data/minecraft')
 
   for (let module of reqModules) {
     if (!(datapack.modules.includes(module))) {
@@ -47,16 +71,15 @@ export default function (req: any, res: any) {
       continue
     }
     try {
-      zip.addLocalFolder(resolve(path + '/data/' + module), '/data/' + module)
+      zip.addLocalFolder(resolve(path + '/data/' + module), basePath + '/data/' + module)
       // console.log(resolve(path + '/data/' + module))
     } catch (error) {
       // console.log('zip module', error)
       continue
     }
   }
-
   //let zipName = `glib-${req.query.canal}-${req.query.version}-${reqModules.join('+')}.zip`
-  let zipName = reqModules.length == 1 ? `Glibs-${reqModules[0]}.zip` : `Glibs-${req.query.canal}.zip`
+  let zipName = `Glibs-Out.zip`
 
 
   // zip.writeZip(zipName, path.resolve('datapacks/downloads/'))

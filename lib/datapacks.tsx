@@ -8,7 +8,8 @@ interface DatapackVersion {
     version?: string | null,
     type?: 'dev' | 'release' | null,
     commit: string,
-    modules?: string[] | null
+    modules?: string[] | null,
+    world?: boolean | null,
 }
 
 function parseFolder(folder: string, commitSha: string) {
@@ -28,6 +29,13 @@ function parseFolder(folder: string, commitSha: string) {
         datapack.canal = releaseName.split('-')[0]
         datapack.version = releaseName.slice(datapack.canal.length + 1)
         datapack.type = 'release'
+    }
+
+    try {
+        fs.accessSync(path.resolve('worlds/' + folder + '/level.dat'), fs.constants.F_OK)
+        datapack.world = true;
+    } catch (err){
+        datapack.world = false;
     }
 
     let modules = []
@@ -215,6 +223,5 @@ export async function getContributors(): Promise<Contributor[] | undefined> {
 }
 
 export async function getGlib() {
-
     return { devs: getDevs(), releases: getReleases(), contributors: await getContributors(), required_modules: process.env.REQUIRED_MODULES?.split(';') }
 }
