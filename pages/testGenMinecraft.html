@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+
+<head>
+    <meta charset="utf-8">
+    <title>Gui enderchest generator • TretinV3</title>
+
+
+    <style type="text/css">
+        th,
+        td {
+            border: 1px solid black;
+            height: 50px;
+            width: 50px;
+        }
+
+        .selected {
+            border: 3px solid black;
+        }
+
+        td {
+            background-color: white;
+        }
+
+        td:hover {
+            background-color: rgb(202, 202, 202);
+        }
+    </style>
+    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+</head>
+
+
+<body onload="load()">
+
+    <h1>GUI generator</h1>
+
+    <div id="chests"></div>
+    <br><br>
+    <button onclick="addLayer()">add page</button>
+    <div id="items" class="in">
+        <form id="itemedit">
+            <label for="itemid">Item id :</label><br>
+            <input type="text" id="itemid" name="itemid" required><br>
+            <label for="itemnbt">Item nbt :</label><br>
+            <input type="text" id="itemnbt" name="itemnbt" value="{}"><br>
+            <label for="itemcount">Count :</label><br>
+            <input type="number" id="itemcount" name="itemcount" min="1" max="64" value="1"><br>
+            <p>Action :</p>
+            <input type="radio" name="action" value="rien" id="rien" checked>
+            <label for="rien">Rien</label>
+            <input type="radio" name="action" value="function" id="function">
+            <label for="function">Function</label>
+            <input type="radio" name="action" value="page" id="page">
+            <label for="page">Page n°<input id="number" type="number" value="0"></label>
+            <br>
+            <input type="button" value="Set" onclick="itemEditSubmit()"> <input type="button" value="remove"
+                onclick="itemEditRemove()">
+        </form>
+    </div>
+
+    <button onclick="generate()">generate</button>
+
+    <script>
+
+        let isItemSelected = false;
+        let itemSelected = {};
+
+        let inventory = [];
+
+        let nbLayer = 0;
+
+        function load() {
+            document.getElementById("items").style.visibility = "hidden";
+
+            addLayer();
+
+            //itemEditSubmit();
+        }
+
+        function generate() {
+            const zip = new JSZip();
+            const gui = zip.folder('functions')
+            gui.file('load.mcfunction', `scoreboard objectives add gui.page dummy\nscoreboard objectives add gui.change dummy\nscoreboard objectives add gui.item dummy\nscoreboard objectives add gui.item2 dummy`)
+            gui.file('test.mcfunction', `execute store result score @s gui.item if data entity @s EnderItems[{}]\nexecute store result score @s gui.item2 if data entity @s EnderItems[{tag:{gui:1}}]\nexecute unless score @s gui.item = @s gui.item2 run function gui:pages/clear`)
+            gui.file('index.mcfunction', `execute as @a run function gui:test\n` + inventory.map((i, k) => i ? `execute as @a[scores={gui.page=${k}}] run function gui:pages/${k}/index\n` : '').join('') + `clear @a #gui:all{gui:1}\nkill @e[nbt={Item:{tag:{gui:1}}}]`)
+            const pages = gui.folder('pages');
+            pages.file('blank.mcfunction', new Array(27).fill('').map((e, i) => `item replace entity @s enderchest.${i} with air`).join(`\n`))
+            pages.file('clear.mcfunction', new Array(27).fill('').map((e, i) => `item replace entity @s[nbt=!{EnderItems:[{tag:{gui:1}, Slot:${i}b}]}] enderchest.${i} with air`).join(`\n`))
+            //console.log(inventory)
+            inventory.map((layer, k) => {
+                console.log(k)
+                const namespace = pages.folder(`${k}`);
+                namespace.file('index.mcfunction', layer.map((item, i) => item ? `execute as @s[nbt=!{EnderItems:[{tag:{gui.action:${i}}}]}, scores={gui.change=0}] run function gui:pages/${k}/actions/${i}\n` : '').join('') + `execute as @s[scores={gui.page=${k}}] run function gui:pages/${k}/set`)
+                namespace.file('set.mcfunction', layer.map((item, i) => item ? `item replace entity @s enderchest.${i} with ${item.id}{gui:1, gui.action:${i}} ${item.count}\n` : '').join('') + `scoreboard players set @s gui.change 0`)
+                const actions = namespace.folder('actions')
+                layer.map((item, i) => {
+                    if (item) actions.file(`${i}.mcfunction`, item.page ? `scoreboard players set @s gui.page ${item.page}\nscoreboard players set @s gui.change 1\nfunction gui:pages/blank` : ``)
+                })
+
+            })
+
+            gui.generateAsync({ type: "blob" })
+                .then(function (blob) {
+                    saveAs(blob, "gui.zip");
+                });
+
+        }
+
+        function invotoryClick(layer, chestCase) { //, layer, chestCase
+
+            console.log("click : " + layer + " " + chestCase)
+
+            if (isItemSelected) document.getElementById(`${itemSelected.layer}l${itemSelected.pos}s`).classList.remove("selected");
+
+            isItemSelected = true;
+            itemSelected["layer"] = layer;
+            itemSelected["pos"] = chestCase;
+            document.getElementById(`${itemSelected.layer}l${itemSelected.pos}s`).classList.add("selected");
+
+
+            if (inventory[layer][chestCase]) {
+                document.getElementById("itemid").value = inventory[layer][chestCase].id;
+                document.getElementById("itemnbt").value = inventory[layer][chestCase].nbt;
+                document.getElementById("itemcount").value = inventory[layer][chestCase].count;
+
+                document.getElementById(inventory[layer][chestCase].action).checked = inventory[layer][chestCase].action;
+                if (selectedValue == "page") document.getElementById("number").value = inventory[layer][chestCase].page;
+            }
+        }
+
+        function addLayer() {
+
+
+            let html = `<input type="hidden" id="chest_table" name="chest_table" value="">
+                <p>${nbLayer}</p>
+				<table class="table empty-chest" id="layer${nbLayer}">`
+
+            for (let i = 0; i < 3; i++) {
+                html += `<tr>`
+                for (let j = 0; j < 9; j++) {
+                    html += `<td class="in" onClick="invotoryClick(${nbLayer}, ${i * 9 + j})" id="${nbLayer}l${i * 9 + j}s"></td>` //, ${nbLayer}, ${i*9 + j}
+                }
+                html += `</tr>`
+            }
+
+            html += `</table>`;
+
+            document.getElementById("chests").innerHTML += html;
+            inventory[nbLayer] = [];
+            nbLayer++
+
+        }
+
+
+        //const formEdit = document.getElementById('itemedit');
+        //document.getElementById("itemedit").onsubmit = function() {itemEditSubmit()};
+        //document.forms["itemedit"].addEventListener("submit", itemEditSubmit, false);
+
+
+        function itemEditSubmit() {
+
+            //event.target.itemid
+
+
+            //console.log(document.getElementById("itemid").value)
+            inventory[itemSelected.layer][itemSelected.pos] = {
+                id: document.getElementById("itemid").value,
+                count: document.getElementById("itemcount").value,
+                nbt: document.getElementById("itemnbt").value,
+            };
+            document.getElementById(`${itemSelected.layer}l${itemSelected.pos}s`).innerHTML = `<img src="https://minecraftitemids.com/item/64/${document.getElementById("itemid").value}.png" alt="image" width="50" height="50">`
+
+
+            const rbs = document.querySelectorAll('input[name="action"]');
+            let selectedValue;
+            for (const rb of rbs) {
+                if (rb.checked) {
+                    selectedValue = rb.value;
+                    break;
+                }
+            }
+            inventory[itemSelected.layer][itemSelected.pos].action = selectedValue;
+            if (selectedValue == "page") inventory[itemSelected.layer][itemSelected.pos].page = document.getElementById("number").value
+            //alert(selectedValue);
+
+
+            //event.preventDefault();
+        };
+
+        function itemEditRemove() {
+
+
+            inventory[itemSelected.layer].splice(itemSelected.pos, 1);
+            document.getElementById(`${itemSelected.layer}l${itemSelected.pos}s`).innerHTML = ``;
+
+        };
+
+        document.addEventListener("click", (evt) => {
+            let targetElement = evt.target;
+            //evt.preventDefault();
+
+
+            do {
+                if (targetElement.className && targetElement.className.includes("in")) {
+
+                    console.log("in !");
+                    document.getElementById("items").style.visibility = "visible";
+                    return;
+                }
+                // Go up the DOM
+                targetElement = targetElement.parentNode;
+            } while (targetElement);
+
+            if (isItemSelected) document.getElementById(`${itemSelected.layer}l${itemSelected.pos}s`).classList.remove("selected");
+            isItemSelected = false;
+            console.log("out !");
+            document.getElementById("items").style.visibility = "hidden";
+
+        });
+    </script>
+
+
+</body>
+
+</html>

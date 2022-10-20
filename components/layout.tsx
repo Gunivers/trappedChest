@@ -3,11 +3,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AppBar, Stack, Toolbar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import Head from "next/head";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from 'next/link'
 import useTranslation from "next-translate/useTranslation";
 import useResizeObserver from "@react-hook/resize-observer";
-
+import CountUp, { useCountUp } from "react-countup"
 
 export default function Layout({ children, bg, getHeightViewport }: any) {
 
@@ -15,6 +15,17 @@ export default function Layout({ children, bg, getHeightViewport }: any) {
 
     const NavBar = useRef<HTMLDivElement>(null);
     useResizeObserver(NavBar, (entry) => getHeightViewport(`(100vh - ${entry.contentRect.height}px)`));
+    const countUpRef = useRef(null);
+    let stupidEnd = Math.floor(Math.random() * 1000)
+    let [stupidCounter, setStupidCounter] = useState<number>(0);
+    const [renderClientSideComponent, setRenderClientSideComponent] = useState(false);
+
+    // useEffect(() => {
+    //     setInterval(() => {
+    //         if(stupidEnd > stupidCounter) setStupidCounter(stupidCounter+1);
+    //         if(stupidEnd < stupidCounter) setStupidCounter(stupidCounter-1);
+    //     }, 100)
+    // }, [renderClientSideComponent]);
 
     return (
         <>
@@ -26,6 +37,11 @@ export default function Layout({ children, bg, getHeightViewport }: any) {
                     <Typography variant="h4" noWrap sx={{ flexGrow: 1 }}>
                         {t('site.name')}
                     </Typography>
+
+                    {/* <Typography variant="h3" sx={{ mx: 'auto' }}>
+                        {stupidEnd}
+                    </Typography> */}
+                    <Box sx={{ flexGrow: 1 }} />
                     <Stack direction="row" spacing={3}>
                         <Link href="https://discord.gg/E8qq6tN">
                             <a>

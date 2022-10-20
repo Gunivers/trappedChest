@@ -230,22 +230,6 @@ export default function Datapack({ data, minHeight }: any) {
                         </Card>
                         <Card>
                             <CardContent>
-                                <Typography variant="h3" gutterBottom>{'Téléchargements'}</Typography>
-                                <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', '& > *': { mr: "8px!important" as "8px", mb: "8px!important" as "8px" } }}>
-                                    <Typography variant="body1" color="text.secondary">
-                                        <CountUp
-                                            start={0}
-                                            end={downloadNumber}
-                                            duration={2.75}
-                                            separator=" "
-                                            suffix=" downloads"
-                                        />
-                                    </Typography>
-                                </Box>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardContent>
                                 <Typography variant="h3" gutterBottom>{t('datapack.contributors')}</Typography>
                                 <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', '& > *': { mr: "8px!important" as "8px", mb: "8px!important" as "8px" } }}>
                                     {data.contributors?.map((contributor: Contributor) => (
@@ -266,13 +250,29 @@ export default function Datapack({ data, minHeight }: any) {
                                 </Box>
                             </CardContent>
                         </Card>
+                        {/* <Card>
+                            <CardContent>
+                                <Typography variant="h3" gutterBottom>{'Téléchargements'}</Typography>
+                                <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', '& > *': { mr: "8px!important" as "8px", mb: "8px!important" as "8px" } }}>
+                                    <Typography variant="body1" color="text.secondary">
+                                        <CountUp
+                                            start={0}
+                                            end={downloadNumber}
+                                            duration={2.75}
+                                            separator=" "
+                                            suffix=" downloads"
+                                        />
+                                    </Typography>
+                                </Box>
+                            </CardContent>
+                        </Card> */}
                         <Card>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', '& > *': { mr: 1 } }}>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', '& > *': { mr: 1, mb: 1 } }}>
                                 <a href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn" title="Louez votre serveur haute qualité, profitez pleinement de vos jeux préférés">
                                     <img src="https://mtxserv.com/build/img/banners/serveur_minecraft.png" height="80" alt='MTxServ' />
                                 </a>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                    <p>Merci à notre partenaire <a style={{ textDecoration: 'underline' }} href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn">mTxServ</a> !</p>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', ml: 1 }}>
+                                    <Typography variant="body1" color="text.secondary">Merci à notre partenaire <Link style={{ textDecoration: 'underline' }} href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn">mTxServ</Link> !</Typography>
                                 </Box>
                             </Box>
                         </Card>

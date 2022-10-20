@@ -20,22 +20,30 @@
     "@mui/lab": "^5.0.0-alpha.97",
     "@mui/material": "^5.0.6",
     "@react-hook/resize-observer": "^1.2.5",
+    "@types/fast-levenshtein": "^0.0.2",
     "adm-zip": "^0.5.9",
     "axios": "^0.24.0",
+    "fastest-levenshtein": "^1.0.16",
     "js-file-download": "^0.4.12",
+    "material-ui-popup-state": "^4.1.0",
     "next": "^12.1.6",
     "next-translate": "^1.2.0",
     "notistack": "^2.0.5",
     "react": "17.0.2",
     "react-countup": "^6.3.1",
     "react-dom": "17.0.2",
-    "react-transition-group": "^4.4.2"
+    "react-material-ui-carousel": "^3.4.2",
+    "react-transition-group": "^4.4.2",
+    "rete-react-render-plugin": "^0.3.0"
   },
   "devDependencies": {
     "@types/node": "^16.11.6",
     "@types/react": "17.0.33",
+    "autoprefixer": "^10.4.12",
     "eslint": "7.32.0",
     "eslint-config-next": "12.0.1",
+    "postcss": "^8.4.17",
+    "tailwindcss": "^3.1.8",
     "typescript": "4.4.4"
   }
 }
