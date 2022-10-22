@@ -36,7 +36,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
     const [itemSelected, setItemSelected] = React.useState<itemSelected>({ gui: 'base', pos: 12 });
 
 
-    const [guiData, setGuiData] = React.useState<Array<inventoryType>>([{ id: 'base', data: [] }, { id: 'helloworld', data: [] }, { id: 'helloworld', data: [] }, { id: 'helloworld', data: [] }, { id: 'helloworld', data: [] }]);
+    const [guiData, setGuiData] = React.useState<Array<inventoryType>>([{ id: 'base', data: [] }, { id: 'helloworld', data: [] }]);
 
 
     const [id, setId] = React.useState<string>('');
