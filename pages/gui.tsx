@@ -1,13 +1,21 @@
-import { Autocomplete, Box, Button, Menu, MenuItem, Card, CardActions, CardContent, Container, Grid, IconButton, Link, Pagination, Paper, Stack, Typography, TextField, CircularProgress, InputLabel, OutlinedInput, InputAdornment, FormControl, Input } from '@mui/material';
+import { Autocomplete, Box, Button, Menu, MenuItem, Card, CardActions, CardContent, Container, Grid, IconButton, Link, Pagination, Paper, Stack, Typography, TextField, CircularProgress, InputLabel, OutlinedInput, InputAdornment, FormControl, Input, createFilterOptions } from '@mui/material';
 import type { NextPage, GetStaticProps } from 'next'
 import React from 'react'
 import Layout from '../components/layout'
-import Carousel from 'react-material-ui-carousel'
 
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import EditIcon from '@mui/icons-material/Edit';
 
 import { usePopupState, bindTrigger, bindMenu, } from 'material-ui-popup-state/hooks'
+import fileDownload from 'js-file-download';
+
+//import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+
+const filter = createFilterOptions<filterAutoCompleteType>();
+interface filterAutoCompleteType {
+    inputValue?: string;
+    id: string;
+}
 
 type actionType = 'nothing' | 'function' | 'page';
 
@@ -26,9 +34,17 @@ interface itemSelected { gui: string, pos: number };
 
 interface inventoryType {
     id: string,
-    data: Array<itemType>
+    data: Array<itemType>,
+    index: number
 }
 
+function reorder<T>(list: Array<T>, startIndex: number, endIndex: number): Array<T> {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+
+    return result;
+};
 
 const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
     const [heightViewport, setHeightViewport] = React.useState<Number | null>(null);
@@ -36,12 +52,19 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
     const [itemSelected, setItemSelected] = React.useState<itemSelected>({ gui: 'base', pos: 12 });
 
 
-    const [guiData, setGuiData] = React.useState<Array<inventoryType>>([{ id: 'base', data: [] }, { id: 'helloworld', data: [] }]);
+    const [guiData, setGuiData] = React.useState<Array<inventoryType>>([{ id: 'base', data: [], index: 0 }, { id: 'helloworld', data: [], index: 1 }]);
 
 
     const [id, setId] = React.useState<string>('');
     const handleChangeId = (event: React.ChangeEvent<HTMLInputElement>) => {
         setId(event.target.value)
+    };
+
+    const [destinationId, setDestinationId] = React.useState<filterAutoCompleteType | null>(null);
+
+    const [namespaceId, setNamespaceId] = React.useState<string>('gui');
+    const handleChangeNamespace = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setNamespaceId(event.target.value)
     };
 
     const [count, setCount] = React.useState<number>(1);
@@ -72,19 +95,31 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setAction(item?.action.type);
     }
 
+    
+    async function generate(){
+        if(namespaceId == '') setNamespaceId('trappedchest')
+        const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/trappedchest`, {body: JSON.stringify(guiData)})
+        const data = await res.arrayBuffer()
+        fileDownload(data, namespaceId);
+    }
+
     return (
         <>
             <Layout getHeightViewport={setHeightViewport}>
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
                         <Stack spacing={2} sx={{ p: 5 }}>
-                            {guiData.map((data) => <GuiInventory gui={data} key={data.id} />)}
-
+                            {guiData.map((data) =>
+                                <GuiInventory gui={data} key={data.id} />
+                            )}
                         </Stack>
                     </Grid>
                     <Grid item xs={6}>
                         <Box sx={{ p: 5 }}>
                             <MenuItemOption />
+                        </Box>
+                        <Box sx={{ p: 5, pt: 0 }}>
+                            <GenerateMenuOption />
                         </Box>
                     </Grid>
                 </Grid>
@@ -166,14 +201,13 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                         <MoreHorizIcon />
                     </IconButton>
                     <Menu {...bindMenu(popupState)}>
-                        <MenuItem onClick={() => { popupState.close(); setEditing(true)}}>Rename</MenuItem>
-                        <MenuItem onClick={popupState.close}>Export</MenuItem>
-                        <MenuItem onClick={popupState.close}>Add after</MenuItem>
-                        <MenuItem onClick={popupState.close} sx={{ color: 'red' }}>Delete</MenuItem>
+                        <MenuItem onClick={() => { popupState.close(); setEditing(true) }}>Rename</MenuItem>
+                        <MenuItem onClick={() => { popupState.close(); }}>Export</MenuItem>
+                        <MenuItem onClick={() => { popupState.close(); }}>Add after</MenuItem>
+                        <MenuItem onClick={() => { popupState.close(); }} sx={{ color: 'red' }}>Delete</MenuItem>
                     </Menu>
                 </CardActions>
             </Card>
-
         )
     }
 
@@ -244,7 +278,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                             )}
                         />
 
-                        <TextField variant="standard" id="outlined-number" label="Count" type="number" defaultValue={1} onChange={handleChangeCount} value={count} sx={{ mr: 1 }} />
+                        <TextField variant="standard" id="outlined-number" label="Count" type="number" onChange={handleChangeCount} value={count} sx={{ mr: 1 }} />
 
                         <TextField
                             variant="standard"
@@ -269,6 +303,87 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                 </CardContent>
                 <CardActions>
                     <Button sx={{ mx: 'auto' }} variant="outlined" color="secondary" onClick={handleItemUpdate}>Update</Button>
+                </CardActions>
+            </Card>
+        )
+    }
+
+    function GenerateMenuOption() {
+
+        const [options, setOptions] = React.useState<filterAutoCompleteType[]>([
+            {id: 'enderchest'}, {id: 'chest'}, {id: 'trappedchest'}
+        ]);
+
+        const addToOptions = (id: string) => {
+            const newOpts = options;
+            newOpts.push({id : id})
+            setOptions(() => newOpts);
+            //console.log(options);
+        }
+
+        return (
+            <Card variant="outlined" >
+                <CardContent>
+                    <Typography variant='h3'>DataPack</Typography>
+                    <Box component="form" sx={{ '& > :not(style)': { m: 1 }, }}>
+
+                    <TextField variant="standard" id="outlined-text" label="Namespace" type="text" onChange={handleChangeNamespace} value={namespaceId}/>
+                        
+                        <Box />
+                        <Autocomplete
+                            value={destinationId}
+                            
+                            onChange={(event, newValue) => {
+                                if (typeof newValue === 'string') {
+                                    addToOptions(newValue)
+                                    setDestinationId({id: newValue});
+                                } else if (newValue && newValue.inputValue) {
+                                    setDestinationId({id : newValue.inputValue});
+                                    addToOptions(newValue.inputValue)
+                                } else {
+                                    setDestinationId(newValue);
+                                }
+                            }}
+                            filterOptions={(options, params) => {
+                                const filtered = filter(options, params);
+
+                                if (params.inputValue !== '') {
+                                    filtered.push({
+                                        inputValue: params.inputValue,
+                                        id: `Add "${params.inputValue}"`,
+                                    });
+                                }
+
+                                return filtered;
+                            }}
+                            id="free-solo-dialog-demo"
+                            options={options}
+                            getOptionLabel={(option) => {
+                                // e.g value selected with enter, right from the input
+                                if (typeof option === 'string') {
+                                    return option;
+                                }
+                                if (option.inputValue) {
+                                    return option.inputValue;
+                                }
+                                return option.id;
+                            }}
+                            selectOnFocus
+                            clearOnBlur
+                            handleHomeEndKeys
+                            renderOption={(props, option) => <li {...props}>{option.id}</li>}
+                            sx={{ width: 300 }}
+                            freeSolo
+                            renderInput={(params) => <TextField {...params} variant="standard" label="Contener" />}
+                        />
+                    </Box>
+                </CardContent>
+                <CardActions>
+                    <Box sx={{ mx: 'auto' }}>
+                        <Button variant="text" size="small" color="primary" onClick={() => {}}>Export</Button>
+                        <Button sx={{mx:2}} variant="contained" color="primary" onClick={() => {}} >Generate</Button>
+                        <Button variant="text" size="small" color="secondary" onClick={() => {}}>Import</Button>
+                    </Box>
                 </CardActions>
             </Card>
         )

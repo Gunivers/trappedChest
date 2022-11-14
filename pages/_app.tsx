@@ -6,8 +6,6 @@ import { config } from '@fortawesome/fontawesome-svg-core'
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import { SnackbarProvider } from 'notistack';
 config.autoAddCss = false
-import { DndProvider } from 'react-dnd'
-import { HTML5Backend } from 'react-dnd-html5-backend'
 
 const theme = createTheme({
   palette: {
@@ -83,9 +81,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <SnackbarProvider maxSnack={5} autoHideDuration={3000}>
-          <DndProvider backend={HTML5Backend}>
             <Component {...pageProps} />
-          </DndProvider>
         </SnackbarProvider>
       </ThemeProvider>
     </>
