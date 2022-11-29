@@ -32,7 +32,7 @@ interface itemType {
 
 interface itemSelected { gui: string, pos: number };
 
-interface inventoryType {
+export interface inventoryType {
     id: string,
     data: Array<itemType>,
     index: number
@@ -72,6 +72,11 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setCount(Number(event.target.value));
     };
 
+    const [goToPage, setGoToPage] = React.useState<number>(0);
+    const handleChangeGoToPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setGoToPage(Number(event.target.value));
+    };
+
     const [action, setAction] = React.useState<actionType>('nothing');
     const handleChangeAction = (event: React.ChangeEvent<HTMLInputElement>) => {
         setAction(event.target.value as actionType);
@@ -80,7 +85,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
     const handleItemUpdate = () => {
         const newGUI: inventoryType[] = Object.assign([], guiData);
         const guiIndex = newGUI.findIndex(d => d.id == itemSelected.gui);
-        newGUI[guiIndex].data[itemSelected.pos] = { count: count, id: id, action: { type: action } };
+        newGUI[guiIndex].data[itemSelected.pos] = { count: count, id: id, action: { type: action, page: goToPage } };
         setGuiData(newGUI);
     };
 
@@ -93,14 +98,19 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setId(item?.id);
         setCount(item?.count);
         setAction(item?.action.type);
+        if(item?.action.type == 'page') setGoToPage(item?.action.page);
     }
 
     
     async function generate(){
         if(namespaceId == '') setNamespaceId('trappedchest')
-        const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/trappedchest`, {body: JSON.stringify(guiData)})
+        console.log(process.env.NEXT_PUBLIC_URL)
+        const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/trappedchest`, {
+            method: "POST",
+            body: JSON.stringify({data: guiData, namespace: namespaceId, version: '1.19'})
+        })
         const data = await res.arrayBuffer()
-        fileDownload(data, namespaceId);
+        fileDownload(data, namespaceId + '.zip');
     }
 
     return (
@@ -299,6 +309,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                                 execute function
                             </MenuItem>
                         </TextField>
+                        {action == 'page' && <TextField variant="standard" id="outlined-number" label="Page Id" type="number" onChange={handleChangeGoToPage} value={goToPage} sx={{ mr: 1 }} />}
                     </Box>
                 </CardContent>
                 <CardActions>
@@ -381,7 +392,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                 <CardActions>
                     <Box sx={{ mx: 'auto' }}>
                         <Button variant="text" size="small" color="primary" onClick={() => {}}>Export</Button>
-                        <Button sx={{mx:2}} variant="contained" color="primary" onClick={() => {}} >Generate</Button>
+                        <Button sx={{mx:2}} variant="contained" color="primary" onClick={() => {generate()}} >Generate</Button>
                         <Button variant="text" size="small" color="secondary" onClick={() => {}}>Import</Button>
                     </Box>
                 </CardActions>
