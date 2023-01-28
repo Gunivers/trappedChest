@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Menu, MenuItem, Card, CardActions, CardContent, Container, Grid, IconButton, Link, Pagination, Paper, Stack, Typography, TextField, CircularProgress, InputLabel, OutlinedInput, InputAdornment, FormControl, Input, createFilterOptions } from '@mui/material';
+import { Autocomplete, Box, Button, Menu, MenuItem, Card, CardActions, CardContent, Container, Grid, IconButton, Link, Pagination, Paper, Stack, Typography, TextField, CircularProgress, InputLabel, OutlinedInput, InputAdornment, FormControl, Input, createFilterOptions, FormHelperText } from '@mui/material';
 import type { NextPage, GetStaticProps } from 'next'
 import React from 'react'
 import Layout from '../components/layout'
@@ -98,16 +98,24 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setId(item?.id);
         setCount(item?.count);
         setAction(item?.action.type);
-        if(item?.action.type == 'page') setGoToPage(item?.action.page);
+        if (item?.action.type == 'page') setGoToPage(item?.action.page);
     }
 
-    
-    async function generate(){
-        if(namespaceId == '') setNamespaceId('trappedchest')
+
+    function getNewIdName(i?: number): string {
+        if (!i) return getNewIdName(1);
+        if (guiData.find(d => d.id == `new${i}`)) return getNewIdName(i + 1);
+        return `new${i}`;
+    }
+
+
+
+    async function generate() {
+        if (namespaceId == '') setNamespaceId('trappedchest')
         console.log(process.env.NEXT_PUBLIC_URL)
         const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/trappedchest`, {
             method: "POST",
-            body: JSON.stringify({data: guiData, namespace: namespaceId, version: '1.19'})
+            body: JSON.stringify({ data: guiData, namespace: namespaceId, version: '1.19' })
         })
         const data = await res.arrayBuffer()
         fileDownload(data, namespaceId + '.zip');
@@ -125,11 +133,13 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                         </Stack>
                     </Grid>
                     <Grid item xs={6}>
-                        <Box sx={{ p: 5 }}>
-                            <MenuItemOption />
-                        </Box>
-                        <Box sx={{ p: 5, pt: 0 }}>
-                            <GenerateMenuOption />
+                        <Box sx={{ position: 'sticky', top: 50, height: 'full' }}>
+                            <Box sx={{ p: 5, }}>
+                                <MenuItemOption />
+                            </Box>
+                            <Box sx={{ p: 5, pt: 0 }}>
+                                <GenerateMenuOption />
+                            </Box>
                         </Box>
                     </Grid>
                 </Grid>
@@ -143,14 +153,18 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         const [isEditing, setEditing] = React.useState<boolean>(false);
         const [idGui, setIdGui] = React.useState<string>(gui.id);
 
+        const [isError, setIsError] = React.useState<boolean>(false);
+
+
         const handleEditChange = (event: React.ChangeEvent<HTMLInputElement>) => {
             setIdGui(event.target.value)
-        };
+            setIsError(!!guiData.find(g => g.id == event.target.value && g.id !== gui.id));
+        }
 
         const handleSetEditChange = () => {
             setEditing(false);
             const newGUI: inventoryType[] = Object.assign([], guiData);
-            const guiIndex = newGUI.findIndex(d => d.id == itemSelected.gui);
+            const guiIndex = newGUI.findIndex(d => d.id == gui.id);
             newGUI[guiIndex].id = idGui;
             setGuiData(newGUI);
         }
@@ -190,6 +204,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                                 type={'text'}
                                 value={idGui}
                                 onChange={handleEditChange}
+                                error={isError}
                                 endAdornment={
                                     <InputAdornment position="end">
                                         <IconButton
@@ -202,6 +217,11 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                                     </InputAdornment>
                                 }
                             />
+                            {isError &&
+                                <FormHelperText id="editGuiId">
+                                    Please don't use a duplicate id
+                                </FormHelperText>
+                            }
                         </FormControl>
                         :
                         <Typography> {gui.id} </Typography>
@@ -213,8 +233,8 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                     <Menu {...bindMenu(popupState)}>
                         <MenuItem onClick={() => { popupState.close(); setEditing(true) }}>Rename</MenuItem>
                         <MenuItem onClick={() => { popupState.close(); }}>Export</MenuItem>
-                        <MenuItem onClick={() => { popupState.close(); }}>Add after</MenuItem>
-                        <MenuItem onClick={() => { popupState.close(); }} sx={{ color: 'red' }}>Delete</MenuItem>
+                        <MenuItem onClick={() => { popupState.close(); setGuiData(g => [...g, { data: [], id: getNewIdName(), index: guiData.length }]) }}>Add after</MenuItem>
+                        <MenuItem onClick={() => { popupState.close(); setGuiData(guiData.filter(g => g.id !== gui.id)) }} sx={{ color: 'red' }}>Delete</MenuItem>
                     </Menu>
                 </CardActions>
             </Card>
@@ -322,12 +342,12 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
     function GenerateMenuOption() {
 
         const [options, setOptions] = React.useState<filterAutoCompleteType[]>([
-            {id: 'enderchest'}, {id: 'chest'}, {id: 'trappedchest'}
+            { id: 'enderchest' }, { id: 'chest' }, { id: 'trappedchest' }
         ]);
 
         const addToOptions = (id: string) => {
             const newOpts = options;
-            newOpts.push({id : id})
+            newOpts.push({ id: id })
             setOptions(() => newOpts);
             //console.log(options);
         }
@@ -338,18 +358,18 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                     <Typography variant='h3'>DataPack</Typography>
                     <Box component="form" sx={{ '& > :not(style)': { m: 1 }, }}>
 
-                    <TextField variant="standard" id="outlined-text" label="Namespace" type="text" onChange={handleChangeNamespace} value={namespaceId}/>
-                        
+                        <TextField variant="standard" id="outlined-text" label="Namespace" type="text" onChange={handleChangeNamespace} value={namespaceId} />
+
                         <Box />
                         <Autocomplete
                             value={destinationId}
-                            
+
                             onChange={(event, newValue) => {
                                 if (typeof newValue === 'string') {
                                     addToOptions(newValue)
-                                    setDestinationId({id: newValue});
+                                    setDestinationId({ id: newValue });
                                 } else if (newValue && newValue.inputValue) {
-                                    setDestinationId({id : newValue.inputValue});
+                                    setDestinationId({ id: newValue.inputValue });
                                     addToOptions(newValue.inputValue)
                                 } else {
                                     setDestinationId(newValue);
@@ -391,15 +411,14 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                 </CardContent>
                 <CardActions>
                     <Box sx={{ mx: 'auto' }}>
-                        <Button variant="text" size="small" color="primary" onClick={() => {}}>Export</Button>
-                        <Button sx={{mx:2}} variant="contained" color="primary" onClick={() => {generate()}} >Generate</Button>
-                        <Button variant="text" size="small" color="secondary" onClick={() => {}}>Import</Button>
+                        <Button variant="text" size="small" color="primary" onClick={() => { }}>Export</Button>
+                        <Button sx={{ mx: 2 }} variant="contained" color="primary" onClick={() => { generate() }} >Generate</Button>
+                        <Button variant="text" size="small" color="secondary" onClick={() => { }}>Import</Button>
                     </Box>
                 </CardActions>
             </Card>
         )
     }
 }
-
 
 export default Gui

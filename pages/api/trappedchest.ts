@@ -3,6 +3,7 @@ let AdmZip = require("adm-zip");
 
 const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/master/1.19/releases/1.19.2/data/registries/item.txt";
 
+const licence = ""
 
 type actionType = 'nothing' | 'function' | 'page';
 
@@ -45,10 +46,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let itemList = (await (await fetch(itemListURL)).text()).split('\n');
 
     zip.addFile(`data/${data.namespace}/tags/items/all.json`, JSON.stringify({ values: itemList }))
-    zip.addFile(`data/${data.namespace}/functions/load.mcfunction`, `scoreboard objectives add ${data.namespace}.page dummy\nscoreboard objectives add ${data.namespace}.change dummy\nscoreboard objectives add ${data.namespace}.item dummy\nscoreboard objectives add gui.item2 dummy`)
-    zip.addFile(`data/${data.namespace}/functions/test.mcfunction`, `execute store result score @s ${data.namespace}.item if data entity @s EnderItems[{}]\nexecute store result score @s ${data.namespace}.item2 if data entity @s EnderItems[{tag:{${data.namespace}:1}}]\nexecute unless score @s ${data.namespace}.item = @s ${data.namespace}.item2 run function ${data.namespace}:pages/clear`)
+    zip.addFile(`data/${data.namespace}/functions/load.mcfunction`, `${licence}scoreboard objectives add ${data.namespace}.page dummy\nscoreboard objectives add ${data.namespace}.change dummy\nscoreboard objectives add ${data.namespace}.item dummy\nscoreboard objectives add ${data.namespace}.item2 dummy`)
+    zip.addFile(`data/${data.namespace}/functions/test.mcfunction`, `${licence}execute store result score @s ${data.namespace}.item if data entity @s EnderItems[{}]\nexecute store result score @s ${data.namespace}.item2 if data entity @s EnderItems[{tag:{${data.namespace}:1}}]\nexecute unless score @s ${data.namespace}.item = @s ${data.namespace}.item2 run function ${data.namespace}:pages/clear`)
 
-    zip.addFile(`data/${data.namespace}/functions/index.mcfunction`, `execute as @a run function ${data.namespace}:test\n${data.data.map((k, v) => `execute as @a[scores={${data.namespace}.page=${v}}] run function ${data.namespace}:pages/${v}/index`).join('\n')}\nclear @a #${data.namespace}:all{${data.namespace}:1}\nkill @e[nbt={Item:{tag:{${data.namespace}:1}}}]`)
+    zip.addFile(`data/${data.namespace}/functions/index.mcfunction`, `${licence}execute as @a run function ${data.namespace}:test\n${data.data.map((k, v) => `execute as @a[scores={${data.namespace}.page=${v}}] run function ${data.namespace}:pages/${v}/index`).join('\n')}\nclear @a #${data.namespace}:all{${data.namespace}:1}\nkill @e[nbt={Item:{tag:{${data.namespace}:1}}}]`)
 
     zip.addFile(`data/${data.namespace}/functions/pages/blank.mcfunction`, new Array(27).fill('').map((k, v) => `item replace entity @s enderchest.${v} with air`).join('\n'))
     zip.addFile(`data/${data.namespace}/functions/pages/clear.mcfunction`, new Array(27).fill('').map((k, v) => `item replace entity @s[nbt=!{EnderItems:[{tag:{${data.namespace}:1}, Slot:${v}b}]}] enderchest.${v} with air`).join('\n'))
@@ -56,14 +57,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     for (let i = 0; i < data.data.length; i++) {
         const inventory = data.data[i];
         if (inventory) {
-            zip.addFile(`data/${data.namespace}/functions/pages/${i}/index.mcfunction`, inventory.data.map((k, v) => k ? `execute as @s[nbt=!{EnderItems:[{tag:{${data.namespace}.action:${v}}}]}, scores={${data.namespace}.change=0}] run function ${data.namespace}:pages/${i}/actions/${v}` : '').join('\n') + `\nexecute as @s[scores={gui.page=${i}}] run function gui:pages/${i}/set`);
-            zip.addFile(`data/${data.namespace}/functions/pages/${i}/set.mcfunction`, inventory.data.map((k, v) => k ? `item replace entity @s enderchest.${v-1} with ${k.id}{gui:1, gui.action:${v}} ${k.count}`  : '').join('\n') + `\nscoreboard players set @s gui.change 0`);
+            zip.addFile(`data/${data.namespace}/functions/pages/${i}/index.mcfunction`, inventory.data.map((k, v) => k ? `execute as @s[nbt=!{EnderItems:[{tag:{${data.namespace}.action:${v}}}]}, scores={${data.namespace}.change=0}] run function ${data.namespace}:pages/${i}/actions/${v}` : '').join('\n') + `\nexecute as @s[scores={${data.namespace}.page=${i}}] run function ${data.namespace}:pages/${i}/set`);
+            zip.addFile(`data/${data.namespace}/functions/pages/${i}/set.mcfunction`, inventory.data.map((k, v) => k ? `item replace entity @s enderchest.${v-1} with ${k.id}{${data.namespace}:1, ${data.namespace}.action:${v}} ${k.count}`  : '').join('\n') + `\nscoreboard players set @s ${data.namespace}.change 0`);
             console.log(inventory);
             for (let j = 0; j < inventory.data.length; j++) {
                 const item = inventory.data[j];
                 
                 if (item && item.action.type == 'page') {
-                    zip.addFile(`data/${data.namespace}/functions/pages/${i}/actions/${j}.mcfunction`, `scoreboard players set @s gui.page ${item.action.page || 0}\nscoreboard players set @s gui.change 1\nfunction gui:pages/blank`)
+                    zip.addFile(`data/${data.namespace}/functions/pages/${i}/actions/${j}.mcfunction`, `${licence}scoreboard players set @s ${data.namespace}.page ${item.action.page || 0}\nscoreboard players set @s ${data.namespace}.change 1\nfunction ${data.namespace}:pages/blank`)
                 }
 
             }
