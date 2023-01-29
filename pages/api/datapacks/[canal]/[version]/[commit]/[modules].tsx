@@ -88,3 +88,9 @@ export default function (req: any, res: any) {
   res.send(zip.toBuffer())
   addDownloadNumber();
 }
+
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+}
