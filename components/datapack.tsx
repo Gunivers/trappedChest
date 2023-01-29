@@ -13,6 +13,7 @@ import { useSnackbar } from 'notistack';
 import DownloadIcon from '@mui/icons-material/Download';
 import PublicIcon from '@mui/icons-material/Public';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import Image from 'next/image'
 
 interface IDictionary {
     [index: string]: boolean;
@@ -269,7 +270,7 @@ export default function Datapack({ data, minHeight }: any) {
                         <Card>
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', '& > *': { mr: 1 } }}>
                                 <a href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn" title="Louez votre serveur haute qualité, profitez pleinement de vos jeux préférés">
-                                    <img src="https://mtxserv.com/build/img/banners/serveur_minecraft.png" height="80" alt='MTxServ' />
+                                    <Image src="https://mtxserv.com/build/img/banners/serveur_minecraft.png" height="80" alt='MTxServ' />
                                 </a>
                                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                     <p>Merci à notre partenaire <a style={{ textDecoration: 'underline' }} href="https://mtxserv.com/fr/?utm_source=altearn_website&utm_medium=website&utm_campaign=altearn">mTxServ</a> !</p>
