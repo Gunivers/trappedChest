@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const inventory = data.data[i];
         if (inventory) {
             zip.addFile(`data/${data.namespace}/functions/pages/${i}/index.mcfunction`, inventory.data.map((k, v) => k ? `execute as @s[nbt=!{EnderItems:[{tag:{${data.namespace}.action:${v}}}]}, scores={${data.namespace}.change=0}] run function ${data.namespace}:pages/${i}/actions/${v}` : '').join('\n') + `\nexecute as @s[scores={${data.namespace}.page=${i}}] run function ${data.namespace}:pages/${i}/set`);
-            zip.addFile(`data/${data.namespace}/functions/pages/${i}/set.mcfunction`, inventory.data.map((k, v) => k ? `item replace entity @s enderchest.${v-1} with ${k.id}{${data.namespace}:1, ${data.namespace}.action:${v}} ${k.count}`  : '').join('\n') + `\nscoreboard players set @s ${data.namespace}.change 0`);
+            zip.addFile(`data/${data.namespace}/functions/pages/${i}/set.mcfunction`, inventory.data.map((k, v) => k ? `item replace entity @s enderchest.${v} with ${k.id}{${data.namespace}:1, ${data.namespace}.action:${v}} ${k.count}`  : '').join('\n') + `\nscoreboard players set @s ${data.namespace}.change 0`);
             console.log(inventory);
             for (let j = 0; j < inventory.data.length; j++) {
                 const item = inventory.data[j];

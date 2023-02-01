@@ -176,16 +176,16 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                         {new Array(3).fill(0).map((_, i) =>
                             <Stack spacing={1} direction="row" key={gui.id + ' ' + (i * 10)}>
                                 {new Array(9).fill(0).map((_, j) =>
-                                    <Box onClick={() => { handleItemSelection({ gui: gui.id, pos: i * 10 + j }) }} key={gui.id + ' ' + (i * 10 + j)} sx={{
-                                        width: 50, height: 50, border: `1px solid ${(itemSelected.gui == gui.id && itemSelected.pos == (i * 10 + j)) ? 'green' : 'white'}`, backgroundColor: `${(itemSelected.gui == gui.id && itemSelected.pos == (i * 10 + j)) ? 'green' : ''}`, opacity: [0.9, 0.8, 0.7], '&:hover': {
+                                    <Box onClick={() => { handleItemSelection({ gui: gui.id, pos: i * 9 + j }) }} key={gui.id + ' ' + (i * 9 + j)} sx={{
+                                        width: 50, height: 50, border: `1px solid ${(itemSelected.gui == gui.id && itemSelected.pos == (i * 9 + j)) ? 'green' : 'white'}`, backgroundColor: `${(itemSelected.gui == gui.id && itemSelected.pos == (i * 9 + j)) ? 'green' : ''}`, opacity: [0.9, 0.8, 0.7], '&:hover': {
                                             backgroundColor: `${(itemSelected.gui == gui.id && itemSelected.pos == (i * 10 + j)) ? 'green' : 'primary.contrastText'}`,
                                         },
                                         // outline: `1px solid ${(gui.data[i * 10 + j] && gui.data[i * 10 + j].action.type == 'page') ? 'red' : 'invisible'}`
                                     }}>
-                                        {gui.data[i * 10 + j] &&
+                                        {gui.data[i * 9 + j] &&
                                             <Box sx={{ position: 'relative' }}>
-                                                <Typography sx={{ position: 'absolute', bottom: 0, right: 0 }}>{gui.data[i * 10 + j].count}</Typography>
-                                                <img src={`https://minecraftitemids.com/item/64/${gui.data[i * 10 + j].id}.png`}></img>
+                                                <Typography sx={{ position: 'absolute', bottom: 0, right: 0 }}>{gui.data[i * 9 + j].count}</Typography>
+                                                <img src={`https://minecraftitemids.com/item/64/${gui.data[i * 9 + j].id}.png`}></img>
                                             </Box>
                                         }
                                     </Box>
