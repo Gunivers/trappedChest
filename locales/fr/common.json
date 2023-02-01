@@ -22,7 +22,7 @@
             "btn": "Télécharger le datapack",
             "btnw": "Télécharger le monde",
             "load": "Préparation en cours",
-            "startLoading": "La préparation du téléchargement a commencé",
+            "startLoading": "La préparation du téléchargement a commencé (cela peut prendre du temps)",
             "success": "Le téléchargement est pret !",
             "independent": "Télécharger indépendamment"
         },

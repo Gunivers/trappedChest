@@ -22,7 +22,7 @@
             "btn": "Download datapack",
             "btnw": "Download world",
             "load": "Preparing...",
-            "startLoading": "The download is preparing",
+            "startLoading": "The download is preparing (it's can take a while)",
             "success": "Download preparation finish !",
             "independent": "Download as independent"
         },
