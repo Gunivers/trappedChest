@@ -1,8 +1,7 @@
 import type { NextPage } from 'next'
+import Link from 'next/link';
 import React from 'react'
-import Datapack from '../components/datapack'
 import Layout from '../components/layout'
-import { getGlib } from '../lib/datapacks'
 
 const Home: NextPage = (glib) => {
   const [heightViewport, setHeightViewport] = React.useState<Number | null>(null);
@@ -10,19 +9,10 @@ const Home: NextPage = (glib) => {
   return (
     <>
       <Layout getHeightViewport={setHeightViewport}>
-        <Datapack data={glib} minHeight={heightViewport} />
+        <Link href="/gui">gui</Link>
       </Layout>
     </>
   )
 }
 
 export default Home
-
-export async function getServerSideProps() {
-  const glib: {} | null = await getGlib()
-  //console.log(glib)
-  return {
-    props:
-      JSON.parse(JSON.stringify(glib))
-  }
-}

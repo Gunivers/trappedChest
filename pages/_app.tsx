@@ -81,7 +81,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <SnackbarProvider maxSnack={5} autoHideDuration={3000}>
-          <Component {...pageProps} />
+            <Component {...pageProps} />
         </SnackbarProvider>
       </ThemeProvider>
     </>
