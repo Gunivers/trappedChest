@@ -3,6 +3,8 @@ import type { NextPage, GetStaticProps } from 'next'
 import React from 'react'
 import Layout from '../components/layout'
 
+import Image from 'next/image'
+
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import EditIcon from '@mui/icons-material/Edit';
 
@@ -96,8 +98,8 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         const item = guiData[guiIndex].data[id.pos];
 
         setId(item?.id);
-        setCount(item?.count);
-        setAction(item?.action.type);
+        setCount(item?.count || 1);
+        setAction(item?.action.type || 'nothing');
         if (item?.action.type == 'page') setGoToPage(item?.action.page);
     }
 
@@ -183,9 +185,9 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                                         // outline: `1px solid ${(gui.data[i * 10 + j] && gui.data[i * 10 + j].action.type == 'page') ? 'red' : 'invisible'}`
                                     }}>
                                         {gui.data[i * 9 + j] &&
-                                            <Box sx={{ position: 'relative' }}>
+                                            <Box sx={{ position: 'relative', width: '100%', height: '100%'}}>
+                                                <Image src={`/images/items/minecraft__${gui.data[i * 9 + j].id}.png`} layout='fill'/>
                                                 <Typography sx={{ position: 'absolute', bottom: 0, right: 0 }}>{gui.data[i * 9 + j].count}</Typography>
-                                                <img src={`https://minecraftitemids.com/item/64/${gui.data[i * 9 + j].id}.png`}></img>
                                             </Box>
                                         }
                                     </Box>
@@ -308,7 +310,16 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                             )}
                         />
 
-                        <TextField variant="standard" id="outlined-number" label="Count" type="number" onChange={handleChangeCount} value={count} sx={{ mr: 1 }} />
+                        <TextField variant="standard" id="outlined-number" label="Count" type="number"
+                            onChange={handleChangeCount}
+                            defaultValue={count}
+                            sx={{ mr: 1 }}
+                            InputProps={{
+                                inputProps: {
+                                    max: 64, min: 1
+                                }
+                            }}
+                        />
 
                         <TextField
                             variant="standard"
@@ -405,7 +416,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                             renderOption={(props, option) => <li {...props}>{option.id}</li>}
                             sx={{ width: 300 }}
                             freeSolo
-                            renderInput={(params) => <TextField {...params} variant="standard" label="Contener" />}
+                            renderInput={(params) => <TextField {...params} variant="standard" label="Gui type" />}
                         />
                     </Box>
                 </CardContent>
