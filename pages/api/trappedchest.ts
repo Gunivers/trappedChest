@@ -62,11 +62,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             console.log(inventory);
             for (let j = 0; j < inventory.data.length; j++) {
                 const item = inventory.data[j];
-                
-                if (item && item.action.type == 'page') {
-                    zip.addFile(`data/${data.namespace}/functions/pages/${i}/actions/${j}.mcfunction`, `${licence}scoreboard players set @s ${data.namespace}.page ${item.action.page || 0}\nscoreboard players set @s ${data.namespace}.change 1\nfunction ${data.namespace}:pages/blank`)
+                if(item){
+                    if (item.action.type == 'page') {
+                        zip.addFile(`data/${data.namespace}/functions/pages/${i}/actions/${j}.mcfunction`, `${licence}scoreboard players set @s ${data.namespace}.page ${item.action.page || 0}\nscoreboard players set @s ${data.namespace}.change 1\nfunction ${data.namespace}:pages/blank`)
+                    }else if(item.action.type == 'function'){
+                        zip.addFile(`data/${data.namespace}/functions/pages/${i}/actions/${j}.mcfunction`, `${licence}function ${item.action.function}`)
+                    }
                 }
-
             }
         }
     }

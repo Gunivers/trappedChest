@@ -1,6 +1,6 @@
 import { Autocomplete, Box, Button, Menu, MenuItem, Card, CardActions, CardContent, Container, Grid, IconButton, Link, Pagination, Paper, Stack, Typography, TextField, CircularProgress, InputLabel, OutlinedInput, InputAdornment, FormControl, Input, createFilterOptions, FormHelperText } from '@mui/material';
 import type { NextPage, GetStaticProps } from 'next'
-import React from 'react'
+import React, { useRef } from 'react'
 import Layout from '../components/layout'
 
 import Image from 'next/image'
@@ -21,15 +21,17 @@ interface filterAutoCompleteType {
 
 type actionType = 'nothing' | 'function' | 'page';
 
-const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/master/1.19/releases/1.19.2/data/registries/item.txt";
+const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest/custom-generated/registries/block.txt";
 
 interface itemType {
     id: string,
     count: number,
-    action: {
-        type: actionType,
-        [k: string]: any,
-    }
+    action: actionObjectType,
+}
+
+interface actionObjectType {
+    type: actionType,
+    [k: string]: any,
 }
 
 interface itemSelected { gui: string, pos: number };
@@ -69,6 +71,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setNamespaceId(event.target.value)
     };
 
+    const textCountRef = useRef();
     const [count, setCount] = React.useState<number>(1);
     const handleChangeCount = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCount(Number(event.target.value));
@@ -79,6 +82,13 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setGoToPage(Number(event.target.value));
     };
 
+    const [functionAction, setFunctionAction] = React.useState<string>('');
+    const handleChangeFunctionAction = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFunctionAction(event.target.value);
+    };
+
+    
+
     const [action, setAction] = React.useState<actionType>('nothing');
     const handleChangeAction = (event: React.ChangeEvent<HTMLInputElement>) => {
         setAction(event.target.value as actionType);
@@ -87,7 +97,13 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
     const handleItemUpdate = () => {
         const newGUI: inventoryType[] = Object.assign([], guiData);
         const guiIndex = newGUI.findIndex(d => d.id == itemSelected.gui);
-        newGUI[guiIndex].data[itemSelected.pos] = { count: count, id: id, action: { type: action, page: goToPage } };
+        //@ts-ignore
+        const newCount = Number(textCountRef?.current?.value || '1') || 1;
+        setCount(newCount);
+        const newAction: actionObjectType = { type: action }
+        if(action == 'page') newAction.page = goToPage;
+        if(action == 'function') newAction.function = functionAction;
+        newGUI[guiIndex].data[itemSelected.pos] = { count: newCount, id: id, action: newAction };
         setGuiData(newGUI);
     };
 
@@ -101,6 +117,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setCount(item?.count || 1);
         setAction(item?.action.type || 'nothing');
         if (item?.action.type == 'page') setGoToPage(item?.action.page);
+        if (item?.action.type == 'function') setFunctionAction(item?.action.function);
     }
 
 
@@ -129,8 +146,8 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
                         <Stack spacing={2} sx={{ p: 5 }}>
-                            {guiData.map((data) =>
-                                <GuiInventory gui={data} key={data.id} />
+                            {guiData.map((data, index) =>
+                                <GuiInventory gui={data} key={data.id} index={index} />
                             )}
                         </Stack>
                     </Grid>
@@ -149,7 +166,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         </>
     )
 
-    function GuiInventory({ gui }: { gui: inventoryType }) {
+    function GuiInventory({ gui, index }: { gui: inventoryType, index?: number }) {
         const popupState = usePopupState({ variant: 'popover', popupId: 'optionInventoryMenu' })
 
         const [isEditing, setEditing] = React.useState<boolean>(false);
@@ -197,6 +214,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                     </Stack>
                 </CardContent>
                 <CardActions>
+                    <Typography variant='subtitle1' >{index}</Typography>
                     <Box sx={{ flexGrow: 1 }} />
                     {isEditing ?
                         <FormControl variant="standard">
@@ -310,15 +328,11 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                             )}
                         />
 
-                        <TextField variant="standard" id="outlined-number" label="Count" type="number"
-                            onChange={handleChangeCount}
+                        <TextField variant="standard" id="outlined-number" label="Count"
+                            inputRef={textCountRef}
                             defaultValue={count}
                             sx={{ mr: 1 }}
-                            InputProps={{
-                                inputProps: {
-                                    max: 64, min: 1
-                                }
-                            }}
+                            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                         />
 
                         <TextField
@@ -341,6 +355,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                             </MenuItem>
                         </TextField>
                         {action == 'page' && <TextField variant="standard" id="outlined-number" label="Page Id" type="number" onChange={handleChangeGoToPage} value={goToPage} sx={{ mr: 1 }} />}
+                        {action == 'function' && <TextField variant="standard" id="outlined-number" label="Function id" onChange={handleChangeFunctionAction} value={functionAction} sx={{ mr: 1 }} />}
                     </Box>
                 </CardContent>
                 <CardActions>
