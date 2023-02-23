@@ -71,7 +71,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setId(event.target.value)
     };
 
-    const [destinationId, setDestinationId] = React.useState<filterAutoCompleteType>({ id: 'enderchest' });
+    const [destinationId, setDestinationId] = React.useState<filterAutoCompleteType | null>({ id: 'enderchest' });
 
     const [namespaceId, setNamespaceId] = React.useState<string>('gui');
     const handleChangeNamespace = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -217,7 +217,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                                     }}>
                                         {gui.data[i * 9 + j] &&
                                             <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-                                                <Image src={`/images/items/minecraft__${gui.data[i * 9 + j].id}.png`} layout='fill' />
+                                                <Image src={`/images/items/minecraft__${gui.data[i * 9 + j].id}.png`} layout='fill' alt={gui.data[i * 9 + j].id} />
                                                 <Typography sx={{ position: 'absolute', bottom: 0, right: 0 }}>{gui.data[i * 9 + j].count}</Typography>
                                             </Box>
                                         }
@@ -253,7 +253,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                             />
                             {isError &&
                                 <FormHelperText id="editGuiId">
-                                    Please don't use a duplicate id
+                                    Please don&apos;t use a duplicate id
                                 </FormHelperText>
                             }
                         </FormControl>
@@ -377,7 +377,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
 
                     <Box sx={{ m: 1, mb: 0 }}>
                         {itemModifiers.map((modifier, index) =>
-                            (<ItemModifier modifier={modifier} index={index} />)
+                            (<ItemModifier modifier={modifier} index={index} key={index}/>)
                         )}
 
                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
