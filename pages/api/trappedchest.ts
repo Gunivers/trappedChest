@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 let AdmZip = require("adm-zip");
 
-const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest/custom-generated/registries/block.txt";
+const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest-release/custom-generated/registries/block.txt";
 
 const licence = ""
 
@@ -64,7 +64,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const inventory = data.data[i];
         if (inventory) {
             
-            console.log(inventory);
 
             let testDataText = '';
 
@@ -93,6 +92,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     }
 
+    const date = new Date();
+    console.log(`[${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}] GUI successfully generated : ${data.namespace}`);
 
     res.setHeader('Content-Type', 'application/zip')
     res.setHeader("Content-Disposition", "attachment; filename=" + 'trappedchest.zip')
