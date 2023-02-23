@@ -43,4 +43,6 @@ yarn-error.log*
 .env
 datapacks/contributors.json
 
+# archive
 Archive.zip
+.next.zip

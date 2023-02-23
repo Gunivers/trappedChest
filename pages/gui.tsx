@@ -73,6 +73,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
 
     const [destinationId, setDestinationId] = React.useState<filterAutoCompleteType | null>({ id: 'enderchest' });
 
+    const changeNamespaceRef = useRef();
     const [namespaceId, setNamespaceId] = React.useState<string>('gui');
     const handleChangeNamespace = (event: React.ChangeEvent<HTMLInputElement>) => {
         setNamespaceId(event.target.value)
@@ -143,14 +144,18 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
 
 
     async function generate() {
-        if (namespaceId == '') setNamespaceId('trappedchest')
-        console.log(process.env.NEXT_PUBLIC_URL)
+
+        //@ts-ignore
+        let namespaceIdNew = changeNamespaceRef?.current?.value || ''
+        if (namespaceIdNew == '') namespaceIdNew = 'trappedchest';
+
+        //console.log(process.env.NEXT_PUBLIC_URL)
         const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/trappedchest`, {
             method: "POST",
-            body: JSON.stringify({ data: guiData, namespace: namespaceId, version: '1.19' })
+            body: JSON.stringify({ data: guiData, namespace: namespaceIdNew, version: '1.19.4' })
         })
         const data = await res.arrayBuffer()
-        fileDownload(data, namespaceId + '.zip');
+        fileDownload(data, namespaceIdNew + '.zip');
     }
 
     return (
@@ -350,7 +355,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
 
                         <TextField variant="standard" id="outlined-number" label="Count"
                             inputRef={textCountRef}
-                            value={count}
+                            defaultValue={count}
                             sx={{ mr: 1 }}
                             inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                         />
@@ -508,7 +513,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                     <Typography variant='h3'>DataPack</Typography>
                     <Box component="form" sx={{ '& > :not(style)': { m: 1 }, }}>
 
-                        <TextField variant="standard" id="outlined-text" label="Namespace" type="text" onChange={handleChangeNamespace} value={namespaceId} />
+                        <TextField variant="standard" id="outlined-text" label="Namespace" type="text" inputRef={changeNamespaceRef} defaultValue={namespaceId} />
 
                         <Box />
                         <Autocomplete
