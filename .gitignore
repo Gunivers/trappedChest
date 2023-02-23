@@ -42,3 +42,5 @@ yarn-error.log*
 /datapacks/release
 .env
 datapacks/contributors.json
+
+Archive.zip

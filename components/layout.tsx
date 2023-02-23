@@ -5,13 +5,9 @@ import { Box } from "@mui/system";
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import Link from 'next/link'
-import useTranslation from "next-translate/useTranslation";
 import useResizeObserver from "@react-hook/resize-observer";
-import CountUp, { useCountUp } from "react-countup"
 
 export default function Layout({ children, bg, getHeightViewport }: any) {
-
-    const { t, lang } = useTranslation('common')
 
     const NavBar = useRef<HTMLDivElement>(null);
     useResizeObserver(NavBar, (entry) => getHeightViewport(`(100vh - ${entry.contentRect.height}px)`));
@@ -30,12 +26,12 @@ export default function Layout({ children, bg, getHeightViewport }: any) {
     return (
         <>
             <Head>
-                <title>{t('site.name')}</title>
+                <title>Trapped Chest</title>
             </Head>
             <AppBar position="fixed" id="NavBar" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }} ref={NavBar}>
                 <Toolbar>
                     <Typography variant="h4" noWrap sx={{ flexGrow: 1 }}>
-                        {t('site.name')}
+                        Trapped Chest
                     </Typography>
 
                     {/* <Typography variant="h3" sx={{ mx: 'auto' }}>
