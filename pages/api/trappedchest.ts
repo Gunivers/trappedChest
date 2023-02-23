@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 let AdmZip = require("adm-zip");
 
-const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/master/1.19/releases/1.19.2/data/registries/item.txt";
+const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest/custom-generated/registries/block.txt";
 
 const licence = ""
 
@@ -14,6 +14,12 @@ interface itemType {
         type: actionType,
         [k: string]: any,
     }
+    modifiers?: Array<itemModifierType>
+}
+
+interface itemModifierType {
+    id: string,
+    condition: string,
 }
 
 interface itemSelected { gui: string, pos: number };
@@ -57,9 +63,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     for (let i = 0; i < data.data.length; i++) {
         const inventory = data.data[i];
         if (inventory) {
-            zip.addFile(`data/${data.namespace}/functions/pages/${i}/index.mcfunction`, inventory.data.map((k, v) => k ? `execute as @s[nbt=!{EnderItems:[{tag:{${data.namespace}.action:${v}}}]}, scores={${data.namespace}.change=0}] run function ${data.namespace}:pages/${i}/actions/${v}` : '').join('\n') + `\nexecute as @s[scores={${data.namespace}.page=${i}}] run function ${data.namespace}:pages/${i}/set`);
-            zip.addFile(`data/${data.namespace}/functions/pages/${i}/set.mcfunction`, inventory.data.map((k, v) => k ? `item replace entity @s enderchest.${v} with ${k.id}{${data.namespace}:1, ${data.namespace}.action:${v}} ${k.count}`  : '').join('\n') + `\nscoreboard players set @s ${data.namespace}.change 0`);
+            
             console.log(inventory);
+
+            let testDataText = '';
+
             for (let j = 0; j < inventory.data.length; j++) {
                 const item = inventory.data[j];
                 if(item){
@@ -68,8 +76,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }else if(item.action.type == 'function'){
                         zip.addFile(`data/${data.namespace}/functions/pages/${i}/actions/${j}.mcfunction`, `${licence}function ${item.action.function}`)
                     }
+
+                    if(item.modifiers){
+                        for (let k = 0; k < item.modifiers.length; k++) {
+                            testDataText += `execute${item.modifiers[k].condition ? ` ${item.modifiers[k].condition}` : ''} run item modify entity @s enderchest.${j} ${item.modifiers[k].id}\n`;
+                        }
+                    }
                 }
             }
+
+            zip.addFile(`data/${data.namespace}/functions/pages/${i}/test.mcfunction`, `${licence}${testDataText}`)
+
+            zip.addFile(`data/${data.namespace}/functions/pages/${i}/index.mcfunction`, inventory.data.map((k, v) => k ? `execute as @s[nbt=!{EnderItems:[{tag:{${data.namespace}.action:${v}}}]}, scores={${data.namespace}.change=0}] run function ${data.namespace}:pages/${i}/actions/${v}` : '').join('\n') + `\nexecute as @s[scores={${data.namespace}.page=${i}}] run function ${data.namespace}:pages/${i}/set` + `${testDataText == '' ? '' : `\nfunction ${data.namespace}:pages/${i}/test`}`);
+            zip.addFile(`data/${data.namespace}/functions/pages/${i}/set.mcfunction`, inventory.data.map((k, v) => k ? `item replace entity @s enderchest.${v} with ${k.id}{${data.namespace}:1, ${data.namespace}.action:${v}} ${k.count}`  : '').join('\n') + `\nscoreboard players set @s ${data.namespace}.change 0`);
+
         }
     }
 

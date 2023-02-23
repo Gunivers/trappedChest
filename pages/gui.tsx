@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Menu, MenuItem, Card, CardActions, CardContent, Container, Grid, IconButton, Link, Pagination, Paper, Stack, Typography, TextField, CircularProgress, InputLabel, OutlinedInput, InputAdornment, FormControl, Input, createFilterOptions, FormHelperText } from '@mui/material';
+import { Autocomplete, Box, Button, Menu, MenuItem, Card, CardActions, CardContent, Container, Grid, IconButton, Link, Pagination, Paper, Stack, Typography, TextField, CircularProgress, InputLabel, OutlinedInput, InputAdornment, FormControl, Input, createFilterOptions, FormHelperText, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import type { NextPage, GetStaticProps } from 'next'
 import React, { useRef } from 'react'
 import Layout from '../components/layout'
@@ -7,6 +7,7 @@ import Image from 'next/image'
 
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
 
 import { usePopupState, bindTrigger, bindMenu, } from 'material-ui-popup-state/hooks'
 import fileDownload from 'js-file-download';
@@ -27,6 +28,12 @@ interface itemType {
     id: string,
     count: number,
     action: actionObjectType,
+    modifiers?: Array<itemModifierType>
+}
+
+interface itemModifierType {
+    id: string,
+    condition: string,
 }
 
 interface actionObjectType {
@@ -64,7 +71,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setId(event.target.value)
     };
 
-    const [destinationId, setDestinationId] = React.useState<filterAutoCompleteType | null>(null);
+    const [destinationId, setDestinationId] = React.useState<filterAutoCompleteType>({ id: 'enderchest' });
 
     const [namespaceId, setNamespaceId] = React.useState<string>('gui');
     const handleChangeNamespace = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +94,11 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setFunctionAction(event.target.value);
     };
 
-    
+    const [itemModifiers, setItemModifiers] = React.useState<Array<itemModifierType>>([]);
+
+    const handleAddModifier = () => {
+        setItemModifiers([...itemModifiers, { id: 'namespace:modifier_id', condition: 'if score player score matches 1' }])
+    }
 
     const [action, setAction] = React.useState<actionType>('nothing');
     const handleChangeAction = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,9 +112,10 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         const newCount = Number(textCountRef?.current?.value || '1') || 1;
         setCount(newCount);
         const newAction: actionObjectType = { type: action }
-        if(action == 'page') newAction.page = goToPage;
-        if(action == 'function') newAction.function = functionAction;
-        newGUI[guiIndex].data[itemSelected.pos] = { count: newCount, id: id, action: newAction };
+        if (action == 'page') newAction.page = goToPage;
+        if (action == 'function') newAction.function = functionAction;
+        newGUI[guiIndex].data[itemSelected.pos] = { count: newCount, id: id, action: newAction, modifiers: itemModifiers };
+
         setGuiData(newGUI);
     };
 
@@ -116,6 +128,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         setId(item?.id);
         setCount(item?.count || 1);
         setAction(item?.action.type || 'nothing');
+        setItemModifiers(item?.modifiers || []);
         if (item?.action.type == 'page') setGoToPage(item?.action.page);
         if (item?.action.type == 'function') setFunctionAction(item?.action.function);
     }
@@ -181,6 +194,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
         }
 
         const handleSetEditChange = () => {
+            if (isError) return;
             setEditing(false);
             const newGUI: inventoryType[] = Object.assign([], guiData);
             const guiIndex = newGUI.findIndex(d => d.id == gui.id);
@@ -202,8 +216,8 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                                         // outline: `1px solid ${(gui.data[i * 10 + j] && gui.data[i * 10 + j].action.type == 'page') ? 'red' : 'invisible'}`
                                     }}>
                                         {gui.data[i * 9 + j] &&
-                                            <Box sx={{ position: 'relative', width: '100%', height: '100%'}}>
-                                                <Image src={`/images/items/minecraft__${gui.data[i * 9 + j].id}.png`} layout='fill'/>
+                                            <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+                                                <Image src={`/images/items/minecraft__${gui.data[i * 9 + j].id}.png`} layout='fill' />
                                                 <Typography sx={{ position: 'absolute', bottom: 0, right: 0 }}>{gui.data[i * 9 + j].count}</Typography>
                                             </Box>
                                         }
@@ -356,12 +370,116 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                         </TextField>
                         {action == 'page' && <TextField variant="standard" id="outlined-number" label="Page Id" type="number" onChange={handleChangeGoToPage} value={goToPage} sx={{ mr: 1 }} />}
                         {action == 'function' && <TextField variant="standard" id="outlined-number" label="Function id" onChange={handleChangeFunctionAction} value={functionAction} sx={{ mr: 1 }} />}
+
+                    </Box>
+
+                    <Divider sx={{ p: 1 }} variant="middle"><Typography variant={'body2'}>item modifiers</Typography></Divider>
+
+                    <Box sx={{ m: 1, mb: 0 }}>
+                        {itemModifiers.map((modifier, index) =>
+                            (<ItemModifier modifier={modifier} index={index} />)
+                        )}
+
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <IconButton aria-label="add condition" size="small" onClick={handleAddModifier}>
+                                <AddIcon />
+                            </IconButton>
+                        </Box>
                     </Box>
                 </CardContent>
                 <CardActions>
                     <Button sx={{ mx: 'auto' }} variant="outlined" color="secondary" onClick={handleItemUpdate}>Update</Button>
                 </CardActions>
             </Card>
+        )
+    }
+
+    function ItemModifier({ modifier, index }: { modifier: itemModifierType, index: number }) {
+
+        const [open, setOpen] = React.useState(false);
+
+        const [idModifier, setIdModifier] = React.useState<string>(modifier.id);
+        const [condition, setCondition] = React.useState<string>(modifier.condition);
+
+        const handleClickOpen = () => {
+            setOpen(true);
+        };
+
+        const handleClose = () => {
+            setOpen(false);
+        };
+
+        const handleChangeIdModifier = (event: React.ChangeEvent<HTMLInputElement>) => {
+            setIdModifier(event.target.value)
+        };
+        const handleChangeCondition = (event: React.ChangeEvent<HTMLInputElement>) => {
+            setCondition(event.target.value)
+        };
+
+        const handleEdit = () => {
+            const newItemModifiers = itemModifiers;
+            newItemModifiers[index].id = idModifier;
+            newItemModifiers[index].condition = condition;
+            setItemModifiers(newItemModifiers);
+
+            setOpen(false);
+        };
+
+        const handleDelete = () => {
+
+            const newItemModifiers = itemModifiers;
+            newItemModifiers.splice(index, 1);
+            
+            setItemModifiers(Object.assign([], newItemModifiers));
+
+            setOpen(false);
+        };
+
+        return (
+            <>
+                <Paper elevation={1} sx={{ display: 'flex', px: 1, my: 1 }} key={index}>
+                    <Typography>{modifier.id}</Typography>
+
+                    <Box sx={{ flexGrow: 1 }} />
+
+                    <IconButton aria-label="edit condition" size="small" onClick={handleClickOpen}>
+                        <EditIcon fontSize="small" />
+                    </IconButton>
+                </Paper>
+                <Dialog open={open} onClose={handleClose}>
+                    <DialogTitle>Edit item modifier</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            The item modifier will be executed at this item if the condition pass
+                        </DialogContentText>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="id"
+                            label="item modifier id"
+                            variant="standard"
+                            defaultValue={modifier.id}
+                            fullWidth
+                            onChange={handleChangeIdModifier}
+                        />
+                        <TextField
+                            margin="dense"
+                            id="condition"
+                            label="execute condition"
+                            helperText="leave blank for always"
+                            variant="standard"
+                            defaultValue={modifier.condition}
+                            fullWidth
+                            onChange={handleChangeCondition}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleDelete} color="error">Delete</Button>
+                        <Button onClick={handleClose}>Cancel</Button>
+                        <Button onClick={handleEdit} variant="outlined" color="success">Edit</Button>
+                    </DialogActions>
+                </Dialog>
+            </>
         )
     }
 

@@ -7,4 +7,14 @@ module.exports =
     images: {
       domains: ['secure.gravatar.com'],
     },
+    // async redirects() {
+    //   return [
+    //     {
+    //       source: '/docs',
+    //       destination: 'https://stackoverflow.com/posts/66662033',
+    //       permanent: false,
+    //       basePath: false
+    //     },
+    //   ]
+    // },
   })
