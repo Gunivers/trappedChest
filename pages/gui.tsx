@@ -234,6 +234,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                         <FormControl variant="standard">
                             <InputLabel htmlFor="editGuiId">Name</InputLabel>
                             <Input
+                                autoFocus
                                 id="editGuiId"
                                 type={'text'}
                                 value={idGui}
@@ -250,6 +251,11 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                                         </IconButton>
                                     </InputAdornment>
                                 }
+                                onKeyPress={(event) => {
+                                    if (event.key == 'Enter'){
+                                        handleSetEditChange();    
+                                    }
+                                }}
                             />
                             {isError &&
                                 <FormHelperText id="editGuiId">
@@ -344,7 +350,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
 
                         <TextField variant="standard" id="outlined-number" label="Count"
                             inputRef={textCountRef}
-                            defaultValue={count}
+                            value={count}
                             sx={{ mr: 1 }}
                             inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                         />

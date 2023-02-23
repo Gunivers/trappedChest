@@ -1,3 +1,4 @@
+import { Button } from '@mui/material';
 import type { NextPage } from 'next'
 import Link from 'next/link';
 import React from 'react'
@@ -9,7 +10,7 @@ const Home: NextPage = (glib) => {
   return (
     <>
       <Layout getHeightViewport={setHeightViewport}>
-        <Link href="/gui">gui</Link>
+        <Button href="/gui" variant='contained' sx={{m: 10}} >gui</Button>
       </Layout>
     </>
   )
