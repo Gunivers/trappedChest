@@ -22,7 +22,7 @@ interface filterAutoCompleteType {
 
 type actionType = 'nothing' | 'function' | 'page';
 
-const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest-release/custom-generated/registries/block.txt";
+const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest-release/custom-generated/registries/item.txt";
 
 interface itemType {
     id: string,

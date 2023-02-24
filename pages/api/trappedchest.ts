@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 let AdmZip = require("adm-zip");
 
-const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest-release/custom-generated/registries/block.txt";
+const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest-release/custom-generated/registries/item.txt";
 
 const licence = ""
 
