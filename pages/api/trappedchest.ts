@@ -1,46 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { itemListURL } from '../../lib/constants';
+import { TrappedDataType } from '../../lib/types';
 let AdmZip = require("adm-zip");
 
-const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest-release/custom-generated/registries/item.txt";
-
 const licence = ""
-
-type actionType = 'nothing' | 'function' | 'page';
-
-interface itemType {
-    id: string,
-    count: number,
-    action: {
-        type: actionType,
-        [k: string]: any,
-    }
-    modifiers?: Array<itemModifierType>
-}
-
-interface itemModifierType {
-    id: string,
-    condition: string,
-}
-
-interface itemSelected { gui: string, pos: number };
-
-export interface inventoryDataType {
-    data: Array<inventoryType>;
-    namespace: string;
-    version: string;
-}
-
-export interface inventoryType {
-    id: string,
-    data: Array<itemType>,
-    index: number
-}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     if (req.method !== "POST") return res.status(405).json({ error: 'please use POST with body' })
 
-    const data = JSON.parse(req.body) as inventoryDataType;
+    const data = JSON.parse(req.body) as TrappedDataType;
 
     let zip = new AdmZip();
 

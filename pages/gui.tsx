@@ -12,52 +12,14 @@ import AddIcon from '@mui/icons-material/Add';
 import { usePopupState, bindTrigger, bindMenu, } from 'material-ui-popup-state/hooks'
 import fileDownload from 'js-file-download';
 
-//import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { itemListURL } from '../lib/constants'
+import { filterAutoCompleteType, itemModifierType, actionType, actionObjectType, inventoryType, itemSelected } from '../lib/types';
+import GuiInventory from '../components/trapped/inventory';
 
 const filter = createFilterOptions<filterAutoCompleteType>();
-interface filterAutoCompleteType {
-    inputValue?: string;
-    id: string;
-}
 
-type actionType = 'nothing' | 'function' | 'page';
 
-const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest-release/custom-generated/registries/item.txt";
-
-interface itemType {
-    id: string,
-    count: number,
-    action: actionObjectType,
-    modifiers?: Array<itemModifierType>
-}
-
-interface itemModifierType {
-    id: string,
-    condition: string,
-}
-
-interface actionObjectType {
-    type: actionType,
-    [k: string]: any,
-}
-
-interface itemSelected { gui: string, pos: number };
-
-export interface inventoryType {
-    id: string,
-    data: Array<itemType>,
-    index: number
-}
-
-function reorder<T>(list: Array<T>, startIndex: number, endIndex: number): Array<T> {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-
-    return result;
-};
-
-const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
+const Gui: NextPage = () => {
     const [heightViewport, setHeightViewport] = React.useState<Number | null>(null);
 
     const [itemSelected, setItemSelected] = React.useState<itemSelected>({ gui: 'base', pos: 12 });
@@ -165,7 +127,18 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
                     <Grid item xs={6}>
                         <Stack spacing={2} sx={{ p: 5 }}>
                             {guiData.map((data, index) =>
-                                <GuiInventory gui={data} key={data.id} index={index} />
+                                <GuiInventory gui={data} key={data.id} index={index}
+                                    menuItems={[ ['Export', () => {}], ['Add after', () => {setGuiData(g => [...g, { data: [], id: getNewIdName(), index: guiData.length }])}], ['Delete', () => {setGuiData(guiData.filter(g => g.id !== data.id))}, { color: 'red' }] ]}
+                                    onEdit={(newId) => {
+                                        const newGUI: inventoryType[] = Object.assign([], guiData);
+                                        const guiIndex = newGUI.findIndex(d => d.id == data.id);
+                                        newGUI[guiIndex].id = newId;
+                                        setGuiData(newGUI);
+                                    }}
+                                    isEditError={(newId) => !!guiData.find(g => g.id == newId && g.id !== data.id)}
+                                    onClick={(id) => handleItemSelection({ gui: data.id, pos: id })}
+                                    selected={itemSelected.gui == data.id ? itemSelected.pos : false}
+                                />
                             )}
                         </Stack>
                     </Grid>
@@ -183,108 +156,6 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
             </Layout>
         </>
     )
-
-    function GuiInventory({ gui, index }: { gui: inventoryType, index?: number }) {
-        const popupState = usePopupState({ variant: 'popover', popupId: 'optionInventoryMenu' })
-
-        const [isEditing, setEditing] = React.useState<boolean>(false);
-        const [idGui, setIdGui] = React.useState<string>(gui.id);
-
-        const [isError, setIsError] = React.useState<boolean>(false);
-
-
-        const handleEditChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-            setIdGui(event.target.value)
-            setIsError(!!guiData.find(g => g.id == event.target.value && g.id !== gui.id));
-        }
-
-        const handleSetEditChange = () => {
-            if (isError) return;
-            setEditing(false);
-            const newGUI: inventoryType[] = Object.assign([], guiData);
-            const guiIndex = newGUI.findIndex(d => d.id == gui.id);
-            newGUI[guiIndex].id = idGui;
-            setGuiData(newGUI);
-        }
-
-        return (
-            <Card variant="outlined" sx={{ width: 'min-content' }} key={gui.id}>
-                <CardContent>
-                    <Stack spacing={1}>
-                        {new Array(3).fill(0).map((_, i) =>
-                            <Stack spacing={1} direction="row" key={gui.id + ' ' + (i * 10)}>
-                                {new Array(9).fill(0).map((_, j) =>
-                                    <Box onClick={() => { handleItemSelection({ gui: gui.id, pos: i * 9 + j }) }} key={gui.id + ' ' + (i * 9 + j)} sx={{
-                                        width: 50, height: 50, border: `1px solid ${(itemSelected.gui == gui.id && itemSelected.pos == (i * 9 + j)) ? 'green' : 'white'}`, backgroundColor: `${(itemSelected.gui == gui.id && itemSelected.pos == (i * 9 + j)) ? 'green' : ''}`, opacity: [0.9, 0.8, 0.7], '&:hover': {
-                                            backgroundColor: `${(itemSelected.gui == gui.id && itemSelected.pos == (i * 10 + j)) ? 'green' : 'primary.contrastText'}`,
-                                        },
-                                        // outline: `1px solid ${(gui.data[i * 10 + j] && gui.data[i * 10 + j].action.type == 'page') ? 'red' : 'invisible'}`
-                                    }}>
-                                        {gui.data[i * 9 + j] &&
-                                            <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-                                                <Image src={`/images/items/minecraft__${gui.data[i * 9 + j].id}.png`} layout='fill' alt={gui.data[i * 9 + j].id} />
-                                                <Typography sx={{ position: 'absolute', bottom: 0, right: 0 }}>{gui.data[i * 9 + j].count}</Typography>
-                                            </Box>
-                                        }
-                                    </Box>
-                                )}
-                            </Stack>
-                        )}
-                    </Stack>
-                </CardContent>
-                <CardActions>
-                    <Typography variant='subtitle1' >{index}</Typography>
-                    <Box sx={{ flexGrow: 1 }} />
-                    {isEditing ?
-                        <FormControl variant="standard">
-                            <InputLabel htmlFor="editGuiId">Name</InputLabel>
-                            <Input
-                                autoFocus
-                                id="editGuiId"
-                                type={'text'}
-                                value={idGui}
-                                onChange={handleEditChange}
-                                error={isError}
-                                endAdornment={
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="toggle password visibility"
-                                            onClick={handleSetEditChange}
-                                            edge="end"
-                                        >
-                                            <EditIcon />
-                                        </IconButton>
-                                    </InputAdornment>
-                                }
-                                onKeyPress={(event) => {
-                                    if (event.key == 'Enter'){
-                                        handleSetEditChange();    
-                                    }
-                                }}
-                            />
-                            {isError &&
-                                <FormHelperText id="editGuiId">
-                                    Please don&apos;t use a duplicate id
-                                </FormHelperText>
-                            }
-                        </FormControl>
-                        :
-                        <Typography> {gui.id} </Typography>
-                    }
-                    <Box sx={{ flexGrow: 1 }} />
-                    <IconButton aria-label="more" {...bindTrigger(popupState)}>
-                        <MoreHorizIcon />
-                    </IconButton>
-                    <Menu {...bindMenu(popupState)}>
-                        <MenuItem onClick={() => { popupState.close(); setEditing(true) }}>Rename</MenuItem>
-                        <MenuItem onClick={() => { popupState.close(); }}>Export</MenuItem>
-                        <MenuItem onClick={() => { popupState.close(); setGuiData(g => [...g, { data: [], id: getNewIdName(), index: guiData.length }]) }}>Add after</MenuItem>
-                        <MenuItem onClick={() => { popupState.close(); setGuiData(guiData.filter(g => g.id !== gui.id)) }} sx={{ color: 'red' }}>Delete</MenuItem>
-                    </Menu>
-                </CardActions>
-            </Card>
-        )
-    }
 
     function MenuItemOption(props: any) {
         const [open, setOpen] = React.useState(false);
@@ -388,7 +259,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
 
                     <Box sx={{ m: 1, mb: 0 }}>
                         {itemModifiers.map((modifier, index) =>
-                            (<ItemModifier modifier={modifier} index={index} key={index}/>)
+                            (<ItemModifier modifier={modifier} index={index} key={index} />)
                         )}
 
                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -440,7 +311,7 @@ const Gui: NextPage<{ items: Array<string> }> = ({ items: itemsList }) => {
 
             const newItemModifiers = itemModifiers;
             newItemModifiers.splice(index, 1);
-            
+
             setItemModifiers(Object.assign([], newItemModifiers));
 
             setOpen(false);
