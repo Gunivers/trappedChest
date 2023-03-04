@@ -42,7 +42,7 @@ export default function GuiInventory({ gui, index, isEditError, onEdit, onClick,
                                 }}>
                                     {gui.data[i * 9 + j] &&
                                         <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-                                            <Image src={`/images/items/minecraft__${gui.data[i * 9 + j].id}.png`} layout='fill' alt={gui.data[i * 9 + j].id} />
+                                            <Image src={`/images/items/minecraft__${gui.data[i * 9 + j].id}.png`} layout='fill' alt={gui.data[i * 9 + j].id} style={{imageRendering: 'pixelated'}}/>
                                             <Typography sx={{ position: 'absolute', bottom: 0, right: 0 }}>{gui.data[i * 9 + j].count}</Typography>
                                         </Box>
                                     }

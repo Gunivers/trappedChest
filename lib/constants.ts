@@ -1,5 +1,6 @@
 
 export const itemListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest-release/custom-generated/registries/item.txt";
+export const blockListURL = "https://raw.githubusercontent.com/PixiGeko/Minecraft-generated-data/latest-release/custom-generated/registries/block.txt";
 
 export function reorder<T>(list: Array<T>, startIndex: number, endIndex: number): Array<T> {
     const result = Array.from(list);

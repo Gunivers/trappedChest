@@ -11,10 +11,6 @@ export default function Layout({ children, bg, getHeightViewport }: any) {
 
     const NavBar = useRef<HTMLDivElement>(null);
     useResizeObserver(NavBar, (entry) => getHeightViewport(`(100vh - ${entry.contentRect.height}px)`));
-    const countUpRef = useRef(null);
-    let stupidEnd = Math.floor(Math.random() * 1000)
-    let [stupidCounter, setStupidCounter] = useState<number>(0);
-    const [renderClientSideComponent, setRenderClientSideComponent] = useState(false);
 
     // useEffect(() => {
     //     setInterval(() => {
@@ -30,13 +26,11 @@ export default function Layout({ children, bg, getHeightViewport }: any) {
             </Head>
             <AppBar position="fixed" id="NavBar" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }} ref={NavBar}>
                 <Toolbar>
-                    <Typography variant="h4" noWrap sx={{ flexGrow: 1 }}>
-                        Trapped Chest
-                    </Typography>
-
-                    {/* <Typography variant="h3" sx={{ mx: 'auto' }}>
-                        {stupidEnd}
-                    </Typography> */}
+                    <Link href='/' passHref>
+                        <Typography variant="h4" noWrap sx={{ flexGrow: 1, cursor: 'pointer' }} >
+                            Trapped Chest
+                        </Typography>
+                    </Link>
                     <Box sx={{ flexGrow: 1 }} />
                     <Stack direction="row" spacing={3}>
                         <Link href="https://discord.gg/E8qq6tN">
