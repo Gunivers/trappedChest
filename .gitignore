@@ -46,3 +46,5 @@ datapacks/contributors.json
 # archive
 Archive.zip
 .next.zip
+
+/styles/tailwind.css
