@@ -6,51 +6,79 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import Editor from '../components/editor/editor'
 import Panel from '../components/editor/panel'
+import Inspector from '../components/inspector'
+import InventoryDisplay from '../components/inventoryDisplay'
+import { gridNode, inspectorInputData, inventoryData } from '../lib/types'
 
-
-interface tabInfoType {
-  content: JSX.Element,
-  name: string,
-}
-
-type grid = gridNode | gridPanel;
-
-interface gridNode {
-  type: 'node',
-  axis: 'x' | 'y'
-  content: Array<grid>
-}
-
-interface gridPanel {
-  type: 'panel',
-  content: Array<tabInfoType>
-}
 
 export default function Home() {
+
+  const [inspectorData, setInspectorData] = useState<inspectorInputData>({ id: 'minecraft:stone', count: 1, nbt: '{}' });
+
+  const [inventoryData, setInventoryData] = useState<inventoryData>([{ id: 'minecraft:stone', count: 1, nbt: '{}' }]);
+
+  const [selected, setSelected] = useState<number>(-1);
+
+  const handleSelected = (id: number) => {
+    
+    console.log(id);
+    setSelected(i => id)
+
+    
+    // setInventoryData(d => d);
+
+    console.log(selected);
+    // setSelected(id);
+    // console.log(selected);
+  };
 
   const [nodes, setNodes] = useState<gridNode>(
     {
       type: 'node',
-      axis: 'x',
+      axis: 'y',
+      size: 100,
       content: [
         {
-          type: 'panel',
-          content: [{ name: 'hello', content: <Panel add='ONE' /> }]
-        },
-        {
           type: 'node',
-          axis: 'y',
+          axis: 'x',
+          size: 80,
           content: [
             {
               type: 'panel',
-              content: [{ name: 'world', content: <Panel add='TWO' /> }]
+              size: 20,
+              content: [{ name: 'world', content: <Panel add='TWO' /> }, { name: 'it\'s me', content: <Panel add='FREE' /> }]
             },
             {
               type: 'panel',
-              content: [{ name: 'it\'s me', content: <Panel add='FREE' /> }]
-            }
+              size: 60,
+              content: [{ name: 'current page', content: <InventoryDisplay input={inventoryData} selected={[selected, handleSelected]} /> }]
+              // content: [{ name: 'current page', content: <div onClick={e => handleSelected(1)}>{selected}</div> }]
+            },
+            {
+              type: 'panel',
+              size: 20,
+              content: [{ name: 'item', content: <Inspector input={[inspectorData, setInspectorData]} /> }]
+            },
+          ]
+        },
+        {
+          type: 'node',
+          axis: 'x',
+          size: 20,
+          content: [
+            {
+              type: 'panel',
+              size: 20,
+              content: [{ name: 'hello', content: <Panel add='ONE' /> }]
+            },
+            {
+              type: 'panel',
+              size: 80,
+              content: [{ name: 'hello', content: <Panel add='ONE' /> }]
+            },
           ]
         }
+
       ]
     }
   );

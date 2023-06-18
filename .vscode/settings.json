@@ -1,5 +1,7 @@
 {
-    "cSpell.words": [
-        "trappedchest"
-    ]
+  "cSpell.words": [
+    "trappedchest"
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
 }

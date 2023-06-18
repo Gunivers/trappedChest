@@ -10,16 +10,16 @@ export default function Tabs({ children, names, display, setDisplay, Tab }: Reac
     if (!display || !setDisplay) [display, setDisplay] = useState<number>(0);
 
     return (
-        <div className="h-full w-full bg-slate-500 overscroll-contain p-2 overflow-auto rounded">
-            <div className="text-xl border-b border-slate-600 flex gap-2 overflow-auto items-center snap-x">
+        <div className="h-full w-full bg-blue-900 overscroll-contain p-2 overflow-auto rounded">
+            <div className="text-xl border-b border-blue-500 flex gap-2 overflow-auto items-center snap-x">
                 {names.map((n, i) =>
-                    <>
+                    <div className="contents" key={i}>
                         {Tab ?
                             <Tab id={i} name={n} display={display} setDisplay={setDisplay} />
                             :
-                            <p key={i} className={`${i == display ? 'bg-slate-700 p-1 rounded-t' : 'hover:bg-slate-600 hover:p-1 hover:rounded-t'} snap-center`} onClick={() => setDisplay && setDisplay(i)}>{n}</p>
+                            <p key={i} className={`${i == display ? 'bg-blue-700 p-1 rounded-t' : 'hover:bg-blue-600 hover:p-1 hover:rounded-t'} snap-center`} onClick={() => setDisplay && setDisplay(i)}>{n}</p>
                         }
-                    </>
+                    </div>
                 )}
             </div>
             {childrenArray[display]}
@@ -44,7 +44,7 @@ export function MovableTabs({ children, names, display, setDisplay, onDrop, onDr
     const [{ isOverTopRight }, dropTopRight] = useDrop(
         () => ({
             accept: 'tab',
-            drop: (item) => { onDropCorner && onDropCorner(item as Array<number>, [...id], 'right'); console.log(item)},
+            drop: (item) => { onDropCorner && onDropCorner(item as Array<number>, [...id], 'right'); console.log(item) },
             collect: monitor => ({
                 isOverTopRight: !!monitor.isOver(),
             }),
@@ -64,21 +64,23 @@ export function MovableTabs({ children, names, display, setDisplay, onDrop, onDr
     )
 
     return (
-        <div className="h-full w-full bg-slate-500 p-2 rounded relative">
-            <div className="text-xl border-b border-slate-600 flex items-center snap-x">
-                {names.map((n, i) =>
-                    <>
-                        <TabDropZone id={[...id, i]} onDrop={onDrop} />
-                        <TabTitlePanel n={n} id={[...id, i]} display={display} setDisplay={setDisplay} />
-                    </>
-                )}
-                <TabDropZone id={[...id, names.length + 1]} onDrop={onDrop} />
+        <div className="h-full w-full bg-blue-200 relative p-1">
+            <div className="flex flex-col h-full w-full">
+                <div className="text-lg border-b border-blue-600 flex items-center snap-x p-1">
+                    {names.map((n, i) =>
+                        <div className="contents" key={i}>
+                            <TabDropZone id={[...id, i]} onDrop={onDrop} />
+                            <TabTitlePanel n={n} id={[...id, i]} display={display} setDisplay={setDisplay} />
+                        </div>
+                    )}
+                    <TabDropZone id={[...id, names.length + 1]} onDrop={onDrop} />
+                </div>
+                {/* <div ref={dropTopRight} className={`absolute top-0 right-0 w-1/4 h-1/4 ${isOverTopRight && onDropCorner ? `bg-black` : ``}`} /> */}
+                <div className="overscroll-contain overflow-auto grow">
+                    {childrenArray[display]}
+                </div>
+                {/* <div ref={dropBottomLeft} className={`absolute bottom-0 left-0 w-1/4 h-1/4 ${isOverBottomLeft && onDropCorner ? `bg-black` : ``}`} /> */}
             </div>
-            <div ref={dropTopRight} className={`absolute top-0 right-0 w-1/4 h-1/4 ${isOverTopRight && onDropCorner ? `bg-black` : ``}`} />
-            <div className="">
-                {childrenArray[display]}
-            </div>
-            <div ref={dropBottomLeft} className={`absolute bottom-0 left-0 w-1/4 h-1/4 ${isOverBottomLeft && onDropCorner ? `bg-black` : ``}`} />
         </div>
     )
 }
@@ -95,7 +97,7 @@ export function TabTitlePanel({ n, id, display, setDisplay }: { n: string, id: A
 
     return (
         <>
-            <p key={depthToId(id) + 'tab'} ref={drag} className={`${id[id.length - 1] == display ? 'bg-slate-700 p-1 rounded-t' : 'hover:bg-slate-600 hover:py-1 hover:rounded-t'} snap-center`} onClick={() => setDisplay && setDisplay(id[id.length - 1])}>{n}</p>
+            <p key={depthToId(id) + 'tab'} ref={drag} className={`${id[id.length - 1] == display ? 'bg-blue-500' : 'hover:bg-blue-400'} snap-center h-full rounded p-1`} onClick={() => setDisplay && setDisplay(id[id.length - 1])}>{n}</p>
             {/* <div key={i} ref={drop} className={`w-1 h-8 pr-1 ${isOver ? 'bg-black' : (false ? 'bg-blue-500' : '')}`} /> */}
         </>
     )
@@ -115,7 +117,7 @@ export function TabDropZone({ id, onDrop }: { id: Array<number>, onDrop: (id: Ar
     )
 
     return (
-        <div key={depthToId(id) + 'drop'} ref={drop} className={`w-1 h-8 pr-1 ${isOver ? 'bg-black' : (false ? 'bg-blue-500' : '')}`} />
+        <div key={depthToId(id) + 'drop'} ref={drop} className={`w-1 h-8 pr-1 ${isOver ? 'bg-lime-500 w-2' : (false ? 'bg-blue-500' : '')}`} />
     )
 }
 

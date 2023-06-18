@@ -10,29 +10,30 @@ import Split from "react-split";
 
 interface PanelsType { width: number | undefined, separatorXPosition: number | undefined, dragging: boolean }
 
-export default function Resizable({ axis = 'x', children }: React.PropsWithChildren<{ axis?: 'x' | 'y' }>) {
+export default function Resizable({ axis = 'x', children, defaultSizes }: React.PropsWithChildren<{ axis?: 'x' | 'y', defaultSizes?: number[] }>) {
 
     const childrenArray = React.Children.toArray(children);
 
-    const [sizes, setSizes] = useState([...childrenArray.map( c => 100)]);
+    const [sizes, setSizes] = useState([...childrenArray.map(c => 100)]);
 
     const direction = axis == 'x' ? 'horizontal' : 'vertical'
 
     return (
         <>
             <Split
-            className={`h-full w-full ${axis == 'x' ? 'flex flex-row' : ''}`}
-            minSize={0}
-            snapOffset={0}
-            direction={axis == 'x' ? 'horizontal' : 'vertical'}
-            gutter={(index, direction) => {
-                const gutter = document.createElement('div')
-                gutter.className = `gutter gutter-${direction} cursor-${axis == 'x' ? 'col' : 'row'}-resize`
-                return gutter
-            }}
-        >
-            {children}
-        </Split>
+                sizes={defaultSizes ? defaultSizes : []}
+                className={`h-full w-full ${axis == 'x' ? 'flex flex-row' : ''}`}
+                minSize={0}
+                snapOffset={0}
+                direction={axis == 'x' ? 'horizontal' : 'vertical'}
+                gutter={(index, direction) => {
+                    const gutter = document.createElement('div')
+                    gutter.className = `gutter gutter-${direction} cursor-${axis == 'x' ? 'col' : 'row'}-resize`
+                    return gutter
+                }}
+            >
+                {children}
+            </Split>
         </>
 
     )

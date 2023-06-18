@@ -1,41 +1,47 @@
+import type { Dispatch, SetStateAction } from "react";
 
-export interface filterAutoCompleteType {
-    inputValue?: string;
-    id: string;
-}
+export type easyState<T> = [T, Dispatch<SetStateAction<T>>]
+export type easyHandler<T> = [T, (i:T) => void]
 
-export type actionType = 'nothing' | 'function' | 'page';
+//==========================================
 
-export interface itemType {
+export type inventoryData = itemData[]
+
+export interface itemData {
     id: string,
     count: number,
-    action: actionObjectType,
-    modifiers?: Array<itemModifierType>
+    nbt: string,
 }
 
-export interface itemModifierType {
+export interface inspectorInputData {
     id: string,
-    condition: string,
+    count: number,
+    nbt: string,
 }
 
-export interface actionObjectType {
-    type: actionType,
-    [k: string]: any,
+
+
+
+// ===============================================
+
+
+
+export interface tabInfoType {
+    content: JSX.Element,
+    name: string,
 }
 
-export interface itemSelected {
-    gui: string,
-    pos: number
-};
+export type grid = gridNode | gridPanel;
 
-export interface inventoryType {
-    id: string,
-    data: Array<itemType>,
-    index: number
+export interface gridNode {
+    type: 'node',
+    axis: 'x' | 'y'
+    content: Array<grid>
+    size: number
 }
 
-export interface TrappedDataType {
-    data: Array<inventoryType>;
-    namespace: string;
-    version: string;
+export interface gridPanel {
+    type: 'panel',
+    content: Array<tabInfoType>
+    size: number
 }

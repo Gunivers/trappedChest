@@ -1,28 +1,9 @@
 "use client"
 
 import { Dispatch, SetStateAction } from "react";
+import { gridNode, grid } from "../../lib/types";
 import Resizable from "./resizable";
 import { MovableTabs } from "./tabs";
-
-interface tabInfoType {
-  content: JSX.Element,
-  name: string,
-}
-
-type grid = gridNode | gridPanel;
-
-interface gridNode {
-  type: 'node',
-  axis: 'x' | 'y'
-  content: Array<grid>
-}
-
-interface gridPanel {
-  type: 'panel',
-  content: Array<tabInfoType>
-}
-
-type sidesDrop = 'right' | 'bottom'
 
 export default function Editor({ nodes, setNodes}: {nodes: gridNode, setNodes: Dispatch<SetStateAction<gridNode>>}) {
 
@@ -52,7 +33,7 @@ export default function Editor({ nodes, setNodes}: {nodes: gridNode, setNodes: D
 
 
   return (
-    <main className="h-screen w-screen p-2.5">
+    <main className="h-screen w-screen">
 
       <NodeGen nodes={nodes} depth={[]} handleDrop={handleDrop}/>
 
@@ -71,7 +52,7 @@ function NodeGen({ nodes, depth, handleDrop }: { nodes: grid, depth: Array<numbe
           id={depth}
           key={depthToId(depth) * 10}
         >
-          {nodes.content.map(t => t.content)}
+          {nodes.content.map((t, i) => <div className="contents" key={i}>{t.content}</div>)}
         </MovableTabs>
 
       </>)
@@ -79,9 +60,9 @@ function NodeGen({ nodes, depth, handleDrop }: { nodes: grid, depth: Array<numbe
   } else if (nodes.type == "node") {
     //nodes = nodes as gridNode;
     return (
-      <Resizable axis={nodes.axis}>
+      <Resizable axis={nodes.axis} defaultSizes={nodes.content.map(n => n.size)}>
         {nodes.content.map((n, index) =>
-          <NodeGen nodes={n} depth={[...depth, index]} key={depthToId([...depth, index])} handleDrop={handleDrop}/>
+            <NodeGen nodes={n} depth={[...depth, index]} key={depthToId([...depth, index])} handleDrop={handleDrop}/>
         )}
       </Resizable>
     )
